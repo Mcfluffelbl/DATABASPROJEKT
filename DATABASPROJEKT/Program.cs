@@ -35,8 +35,8 @@ using (var db = new StoreContext())
         Console.WriteLine("Seeded db!");
     }
 
-    // Enkel  seeding för databasen
-    // Kör bara om det inte finns några order sen innan
+    // An easy seeding for the database
+    // Only if there are no orders already
     if (!await db.Orders.AnyAsync())
     {
         db.Orders.AddRange(
@@ -52,7 +52,9 @@ using (var db = new StoreContext())
 
 while (true)
 {
-    Console.WriteLine("\n Commands: 1. Customerlist | 2. View Orders | 3. Add Customer | 4. Edit Customer | 5. Delete Customer | 7. Order Details | 8. Add Order | 9. Add Product | 10. Product List | 11. ordersbystatus <status> | 12. ordersbycustomer <customerId> | 13. orderspage <page> <pageSize> | 14. Order List | 15. List Order | 0. Exit |");
+    Console.WriteLine("\n=============================");
+    Console.WriteLine("=== ShoppingApp Main Menu ===");
+    Console.WriteLine("\n Commands: 1. Customerlist | 2. View Orders | 3. Add Customer | 4. Edit Customer <ID> | 5. Delete Customer <ID> | 7. Order Details | 8. Add Order | 9. Add Product | 10. Product List | 11. ordersbystatus <status> | 12. ordersbycustomer <customerId> | 13. orderspage <page> <pageSize> | 14. Order List | 15. List Order | 0. Exit |");
     Console.WriteLine("Enter your choice: ");
     var line = Console.ReadLine()?.Trim() ?? string.Empty;
 
@@ -180,7 +182,7 @@ static async Task ShowCustomersAsync()
 {
     using var db = new StoreContext();
 
-    // AsNoTracking = snabbare för read-only scenation. (Ingen change tracking)
+    // AsTracking = faster for read-only scenation. (No change tracking)
     var rows = await db.Customers.AsNoTracking().OrderBy(customers => customers.CustomerId).ToListAsync();
     Console.WriteLine("-------------------");
     Console.WriteLine("CustomerId | Name | Email | City ");
@@ -196,7 +198,7 @@ static async Task ShowOrdersAsync()
     using var db = new StoreContext();
     var orders = await db.Orders
         .AsNoTracking()
-        .Include(x => x.Customer) // Eager loading av Customer
+        .Include(x => x.Customer) // Eager loading of Customer
         .OrderBy(x => x.OrderId)
         .ToListAsync();
 
@@ -242,7 +244,7 @@ static async Task AddCustomerAsync()
     db.Customers.Add(new Customer { Name = name, Email = email, City = city });
     try
     {
-        // Spara våra ändringar: Trigga en INSERT + all valedring/constraints i databasen
+        // Save our changes: Trigger an INSERT + all validation/constraints in the database
         await db.SaveChangesAsync();
         Console.WriteLine("Customer added!");
         Console.WriteLine("----------------------------");
@@ -259,7 +261,7 @@ static async Task EditCustomerAsync(int id)
 {
     using var db = new StoreContext();
 
-    // Get CustomerId to edit
+    // Get CustomerId to edit the chosen customer
     var customer = await db.Customers.FirstOrDefaultAsync(x => x.CustomerId == id);
     if (customer == null)
     {
@@ -416,6 +418,7 @@ static async Task AddOrderAsync()
     using var db = new StoreContext();
 
     // Show existing customers to choose from
+    Console.WriteLine("Current Customers: ");
     await ShowCustomersAsync();
 
     // Let user input data for new order, asks for CustomerId
@@ -448,6 +451,7 @@ static async Task AddOrderAsync()
         !Enum.IsDefined(typeof(Status), input))
     {
         Console.WriteLine("Invalid status selection.");
+        Console.WriteLine("----------------------------");
         return;
     }
 
@@ -457,7 +461,9 @@ static async Task AddOrderAsync()
     var orderRows = new List<OrderRow>();
     while (true)
     {
+        Console.WriteLine("Current Products: ");
         await ShowProductsAsync();
+
         Console.WriteLine("Enter Product ID to add to order (or leave blank to finish): ");
         var prodInput = Console.ReadLine()?.Trim();
         if (string.IsNullOrEmpty(prodInput))
@@ -466,6 +472,7 @@ static async Task AddOrderAsync()
         if (!int.TryParse(prodInput, out var productId))
         {
             Console.WriteLine("Invalid Product ID.");
+            Console.WriteLine("----------------------------");
             continue;
         }
 
@@ -473,6 +480,7 @@ static async Task AddOrderAsync()
         if (product == null)
         {
             Console.WriteLine("Product not found.");
+            Console.WriteLine("----------------------------");
             continue;
         }
 
@@ -480,12 +488,14 @@ static async Task AddOrderAsync()
         if (!int.TryParse(Console.ReadLine(), out var quantity) || quantity <= 0)
         {
             Console.WriteLine("Invalid quantity.");
+            Console.WriteLine("----------------------------");
             continue;
         }
 
         if (quantity > product.StockQuantity)
         {
             Console.WriteLine("Not enough in stock.");
+            Console.WriteLine("----------------------------");
             continue;
         }
 
@@ -541,6 +551,7 @@ static async Task AddProductAsync()
 {
     using var db = new StoreContext();
 
+    Console.WriteLine("Current Products: ");
     await ShowProductsAsync();
 
     // Let user input data for new product name
@@ -651,3 +662,6 @@ static async Task OrdersPageAsync(int page, int pageSize)
         Console.WriteLine($"{order.OrderId} - {order.CustomerId} - {order.OrderDate} | {order.Customer?.Name}");
     }
 }
+
+// Lägg till kategorier method här...
+// I kategori metod ska du kunna lägga till, redigera, ta bort och lista kategorier.
