@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DATABASPROJEKT.Enum;
 
 namespace DATABASPROJEKT.Models
 {
@@ -15,6 +16,7 @@ namespace DATABASPROJEKT.Models
         // FK
         public int OrderId { get; set; }
         public int ProductId { get; set; }
+        public Status? Status { get; set; }
 
         // Properties
         [Required]
