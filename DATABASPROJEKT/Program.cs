@@ -11,7 +11,7 @@ using (var db = new StoreContext())
 {
     // Migrate Async: Skapar databasen om den inte finns
     // Kör bara om det inte finns några kategorier sen innan
-    //await db.Database.MigrateAsync();
+    await db.Database.MigrateAsync();
 
     // Enkel seeding för databasen
     // Kör bara om det inte finns några Customers sen innan
