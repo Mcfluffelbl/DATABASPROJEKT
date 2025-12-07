@@ -16,6 +16,7 @@ namespace DATABASPROJEKT
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderRow> OrderRows => Set<OrderRow>();
         public DbSet<OrderSummary> OrderSummaries => Set<OrderSummary>();
+        public DbSet<Categorie> Categories => Set<Categorie>();
 
         // Here we tell EF Core that we want to use SQLite and where the file should be located
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

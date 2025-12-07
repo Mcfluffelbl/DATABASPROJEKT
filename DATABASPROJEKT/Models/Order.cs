@@ -25,5 +25,7 @@ namespace DATABASPROJEKT.Models
 
         // One order can have multiple OrderRows
         public List<OrderRow> OrderRows { get; set; } = new();
+
+        // Lägg till Categry info
     }
 }

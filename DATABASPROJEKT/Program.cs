@@ -17,6 +17,16 @@ using (var db = new StoreContext())
     // Kör bara om det inte finns några Customers sen innan
     if (!await db.Customers.AnyAsync())
     {
+        if (!await db.Categories.AnyAsync())
+        {
+            db.Categories.AddRange(
+                new Categorie { CategorieName = "Books"},
+                new Categorie { CategorieName = "Movies"}
+                );
+            await db.SaveChangesAsync();
+            Console.WriteLine("Seeded db!");
+        }
+
         db.Customers.AddRange(
             new Customer { CustomerId = 1, Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy" },
             new Customer { CustomerId = 2, Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway" }
@@ -28,8 +38,8 @@ using (var db = new StoreContext())
     if (!await db.Products.AnyAsync())
     {
         db.Products.AddRange(
-        new Product { ProductId = 1, ProductName = "Skruv", Price = 10, StockQuantity = 1 },
-        new Product { ProductId = 2, ProductName = "Spik", Price = 25, StockQuantity = 23 }
+        new Product { ProductId = 1, ProductName = "Skruv", Price = 10, StockQuantity = 1, CategorieId = 1 },
+        new Product { ProductId = 2, ProductName = "Spik", Price = 25, StockQuantity = 23, CategorieId = 1 }
         );
         await db.SaveChangesAsync();
         Console.WriteLine("Seeded db!");
@@ -396,6 +406,7 @@ static async Task ShowOrderDetailsAsync()
     Console.WriteLine($"Customer Name: {order.Customer?.Name}");
     Console.WriteLine($"Status: {order.Status}");
     Console.WriteLine($"Total Amount: {order.TotalAmount:C}");
+    Console.WriteLine($"Category: - Lägg till category -");
     Console.WriteLine("Order lines:");
     if (order.OrderRows != null && order.OrderRows.Any())
     {
@@ -665,3 +676,8 @@ static async Task OrdersPageAsync(int page, int pageSize)
 
 // Lägg till kategorier method här...
 // I kategori metod ska du kunna lägga till, redigera, ta bort och lista kategorier.
+static async Task ManageCategoriesAsync()
+{
+    using var db = new StoreContext();
+    // Implement category management logic here
+}
