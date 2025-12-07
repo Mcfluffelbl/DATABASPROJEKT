@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,8 @@ namespace DATABASPROJEKT.Models
         // One order can have multiple OrderRows
         public List<OrderRow> OrderRows { get; set; } = new();
 
-        // Lägg till Categry info
+        // Navigation property
+        [ForeignKey("CategorieId")]
+        public Categorie? Categorie { get; set; }
     }
 }

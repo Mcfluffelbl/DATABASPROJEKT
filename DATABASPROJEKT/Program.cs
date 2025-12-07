@@ -213,7 +213,7 @@ static async Task ShowOrdersAsync()
         .ToListAsync();
 
     Console.WriteLine("-------------------");
-    Console.WriteLine("OrderId | OrderDate | CustomerName | Status | TotalAmount");
+    Console.WriteLine(" OrderId | OrderDate | CustomerName | Status | TotalAmount | Category ");
     foreach (var order in orders)
     {
         Console.WriteLine($"{order.OrderId} | {order.OrderDate.ToShortDateString()} | {order.Customer?.Name} | {order.Status} | {order.TotalAmount:C}");
@@ -591,12 +591,24 @@ static async Task AddProductAsync()
         return;
     }
 
+    Console.WriteLine("Current Categories: ");
+    // Visa kategorier
+
+    Console.WriteLine("Enter Product Category: ");
+    if (!int.TryParse(Console.ReadLine(), out var categorieId))
+    {
+        Console.WriteLine("Invalid Category ID.");
+        Console.WriteLine("----------------------------");
+        return;
+    }
+
     // Create new product
     var product = new Product
     {
         ProductName = productname,
         Price = productprice,
-        StockQuantity = productquantity
+        StockQuantity = productquantity,
+        CategorieId = categorieId
     };
 
     db.Products.Add(product);
