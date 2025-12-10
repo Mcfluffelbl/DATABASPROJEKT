@@ -5,60 +5,7 @@ using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
 using DATABASPROJEKT.Helpers;
 
-Console.WriteLine("DB: " + Path.Combine(AppContext.BaseDirectory, "shop.db"));
 Console.WriteLine("Welcome To Youre ShoppingApp!");
-
-// Säkerhetställ DB + migrations + seed
-using (var db = new StoreContext())
-{
-    // Migrate Async: Skapar databasen om den inte finns
-    // Kör bara om det inte finns några kategorier sen innan
-    await db.Database.MigrateAsync();
-
-    // Enkel seeding för databasen
-    // Kör bara om det inte finns några Customers sen innan
-    if (!await db.Customers.AnyAsync())
-    {       
-        db.Customers.AddRange(
-            new Customer { CustomerId = 1, Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy" },
-            new Customer { CustomerId = 2, Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway" }
-        );
-        await db.SaveChangesAsync();
-        Console.WriteLine("Seeded db!");
-    }
-
-    if (!await db.Products.AnyAsync())
-    {
-        db.Products.AddRange(
-        new Product { ProductId = 1, ProductName = "Skruv 1.2cm", Price = 10, StockQuantity = 1, CategorieName = "Skruvar" },
-        new Product { ProductId = 2, ProductName = "Spik 0.2cm", Price = 25, StockQuantity = 23, CategorieName = "Spikar" }
-        );
-        await db.SaveChangesAsync();
-        Console.WriteLine("Seeded db!");
-    }
-
-    if (!await db.Categories.AnyAsync())
-    {
-        db.Categories.AddRange(
-        new Categorie { CategorieName = "Skruvar" },
-        new Categorie { CategorieName = "Spikar" }
-        );
-        await db.SaveChangesAsync();
-        Console.WriteLine("Seeded db!");
-    }
-
-    // An easy seeding for the database
-    // Only if there are no orders already
-    if (!await db.Orders.AnyAsync())
-    {
-        db.Orders.AddRange(
-        new Order { OrderId = 1, OrderDate = DateTime.Today.AddDays(-3), CustomerId = 1, Status = Status.Paid, TotalAmount = 10000 },
-        new Order { OrderId = 2, OrderDate = DateTime.Today.AddDays(-10), CustomerId = 2, Status = Status.Pending, TotalAmount = 200 }
-        );
-        await db.SaveChangesAsync();
-        Console.WriteLine("Seeded db!");
-    }
-}
 
 await MainMenuAsync();
 
