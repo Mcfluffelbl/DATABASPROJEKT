@@ -59,45 +59,52 @@ using (var db = new StoreContext())
         Console.WriteLine("Seeded db!");
     }
 }
-while (true)
+
+await MainMenuAsync();
+
+// Main Menu
+static async Task MainMenuAsync()
 {
-    Console.WriteLine("\n=============================");
-    Console.WriteLine("=== Main Menu ===");
-    Console.WriteLine("\n Commands: 1. Customer | 2. Orders | 3. Products | 4. Categories | 5. Exit ");
-    Console.WriteLine("Enter your choice: ");
-    Console.WriteLine("> ");
-    var line = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(line))
-        break;
-    if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
-        break;
-    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var cmd = parts[0].ToLowerInvariant();
-    switch (cmd)
+    while (true)
     {
-        case "1":
-        case "customer":
-            await CustomerAsync();
+        Console.WriteLine("\n=============================");
+        Console.WriteLine("=== Main Menu ===");
+        Console.WriteLine("\n Commands: 1. Customer | 2. Orders | 3. Products | 4. Categories | 5. Exit ");
+        Console.WriteLine("Enter your choice: ");
+        Console.WriteLine("> ");
+        var line = Console.ReadLine()?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(line))
             break;
-        case "2":
-        case "orders":
-            await OrdersAsync();
+        if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
             break;
-        case "3":
-        case "products":
-            await ProductsAsync();
-            break;
-        case "4":
-        case "categorys":
-            await CategoriesAsync();
-            break;
-        default:
-            Console.WriteLine("Unknown command. Please try again.");
-            break;
+        var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var cmd = parts[0].ToLowerInvariant();
+        switch (cmd)
+        {
+            case "1":
+            case "customer":
+                await CustomerAsync();
+                break;
+            case "2":
+            case "orders":
+                await OrdersAsync();
+                break;
+            case "3":
+            case "products":
+                await ProductsAsync();
+                break;
+            case "4":
+            case "categorys":
+                await CategoriesAsync();
+                break;
+            default:
+                Console.WriteLine("Unknown command. Please try again.");
+                break;
+        }
+        break;
     }
-    break;
+    return;
 }
-return;
 
 // Customer Menu
 static async Task CustomerAsync()
@@ -112,7 +119,10 @@ static async Task CustomerAsync()
         if (string.IsNullOrEmpty(line))
             continue;
         if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
+        {
+            await MainMenuAsync();
             break;
+        }
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();
         switch (cmd)
@@ -158,7 +168,10 @@ static async Task OrdersAsync()
         if (string.IsNullOrEmpty(line))
             continue;
         if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
+        {
+            await MainMenuAsync();
             break;
+        }
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();
         switch (cmd)
@@ -218,7 +231,11 @@ static async Task ProductsAsync()
         if (string.IsNullOrEmpty(line))
             continue;
         if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
+        {
+            await MainMenuAsync();
             break;
+        }
+
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();
         switch (cmd)
@@ -261,7 +278,7 @@ static async Task ProductsAsync()
                 Console.WriteLine("Unknown command. Please try again.");
                 break;
         }
-    }
+    } 
 }
 
 // Categories Menu
@@ -277,7 +294,10 @@ static async Task CategoriesAsync()
         if (string.IsNullOrEmpty(line))
             continue;
         if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
+        {
+            await MainMenuAsync();
             break;
+        }
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();
         switch (cmd)
