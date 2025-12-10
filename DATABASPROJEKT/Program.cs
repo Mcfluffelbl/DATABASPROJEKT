@@ -22,8 +22,8 @@ using (var db = new StoreContext())
         if (!await db.Categories.AnyAsync())
         {
             db.Categories.AddRange(
-                new Categorie { CategorieName = "Books"},
-                new Categorie { CategorieName = "Movies"}
+                new Categorie { CategorieName = "Skruvar" },
+                new Categorie { CategorieName = "Spikar" }
                 );
             await db.SaveChangesAsync();
             Console.WriteLine("Seeded db!");
@@ -40,8 +40,8 @@ using (var db = new StoreContext())
     if (!await db.Products.AnyAsync())
     {
         db.Products.AddRange(
-        new Product { ProductId = 1, ProductName = "Skruv", Price = 10, StockQuantity = 1, CategorieId = 1 },
-        new Product { ProductId = 2, ProductName = "Spik", Price = 25, StockQuantity = 23, CategorieId = 1 }
+        new Product { ProductId = 1, ProductName = "Skruv 1.2cm", Price = 10, StockQuantity = 1, CategorieName = "Skruvar" },
+        new Product { ProductId = 2, ProductName = "Spik 0.2cm", Price = 25, StockQuantity = 23, CategorieName = "Spikar" }
         );
         await db.SaveChangesAsync();
         Console.WriteLine("Seeded db!");
@@ -69,7 +69,7 @@ while (true)
     var line = Console.ReadLine()?.Trim() ?? string.Empty;
     if (string.IsNullOrEmpty(line))
         break;
-    if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
+    if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
         break;
     var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     var cmd = parts[0].ToLowerInvariant();
@@ -152,12 +152,12 @@ static async Task OrdersAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Order Management ===");
-        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 0. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 5. Show Order Details <ID> | 6. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
             continue;
-        if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
+        if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
             break;
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();
@@ -175,7 +175,7 @@ static async Task OrdersAsync()
             case "editorder":
                 if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
                 {
-                    Console.WriteLine("Usage: Delete <id>");
+                    Console.WriteLine("Usage: <id>");
                     break;
                 }
                 await OrderHelper.EditOrderAsync(idD);
@@ -188,6 +188,15 @@ static async Task OrdersAsync()
                     break;
                 }
                 await OrderHelper.DeleteOrderAsync(id);
+                break;
+            case "5":
+            case "showorderdetailsasync":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var DiD))
+                {
+                    Console.WriteLine("Usage: <id>");
+                    break;
+                }
+                await OrderHelper.ShowOrderDetailsAsync(DiD);
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");
@@ -203,7 +212,7 @@ static async Task ProductsAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Product Management ===");
-        Console.WriteLine("Commands: 1. List Products | 2. Add Product | 3. Edit Product <ID> | 4. Delete Product <ID> | 5. Show Product Details | 6. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Products | 2. Add Product | 3. Edit Product <ID> | 4. Delete Product <ID> | 5. Show Product Details <ID> | 6. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
@@ -226,7 +235,7 @@ static async Task ProductsAsync()
             case "editproduct":
                 if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
                 {
-                    Console.WriteLine("Usage: Delete <id>");
+                    Console.WriteLine("Usage: <id>");
                     break;
                 }
                 await ProductHelper.EditProductAsync(idD);
@@ -243,7 +252,7 @@ static async Task ProductsAsync()
             case "5":
                 if (parts.Length < 2 || !int.TryParse(parts[1], out var productId))
                 {
-                    Console.WriteLine("Usage: Delete <id>");
+                    Console.WriteLine("Usage: <id>");
                     break;
                 }
                 await ProductHelper.ShowProductDetailsAsync(productId);
@@ -262,12 +271,12 @@ static async Task CategoriesAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Category Management ===");
-        Console.WriteLine("Commands: 1. List Categories | 2. Add Category | 3. Edit Category <ID> | 4. Delete Category <ID> | 0. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Categories | 2. Add Category | 3. Edit Category <ID> | 4. Delete Category <ID> | 5. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
             continue;
-        if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
+        if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
             break;
         var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var cmd = parts[0].ToLowerInvariant();

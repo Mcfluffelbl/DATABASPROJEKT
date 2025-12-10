@@ -17,6 +17,7 @@ namespace DATABASPROJEKT.Models
         public int OrderId { get; set; }
         public int ProductId { get; set; }
         public Status? Status { get; set; }
+        public int? CategorieId { get; set; }
 
         // Properties
         [Required]
@@ -29,5 +30,8 @@ namespace DATABASPROJEKT.Models
 
         // Access to product info for each order line
         public Product? Product { get; set; }
+
+        //Access to category info for each order line
+        public Categorie? Categorie { get; set; }
     }
 }

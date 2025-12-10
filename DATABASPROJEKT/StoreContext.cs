@@ -63,6 +63,11 @@ namespace DATABASPROJEKT
 
                 // One Product can have many OrderRows
                 e.HasMany(p => p.OrderRows);
+                // One Product has one Categorie
+                e.HasOne(p => p.Categorie)
+                 .WithMany(c => c.Products)
+                 .HasForeignKey(p => p.CategorieId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Order
@@ -106,6 +111,12 @@ namespace DATABASPROJEKT
                 e.HasOne(or => or.Product)
                  .WithMany(p => p.OrderRows)
                  .HasForeignKey(or => or.ProductId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // One OrderRow has one Categorie
+                e.HasOne(or => or.Categorie)
+                 .WithMany(c => c.OrderRows)
+                 .HasForeignKey(or => or.CategorieId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
         }

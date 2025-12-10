@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using DATABASPROJEKT.Enum;
@@ -11,20 +12,7 @@ namespace DATABASPROJEKT.Helpers
 {
     public static class OrderHelper
     {
-        public static async Task ListOrderAsync()
-        {
-            using var db = new StoreContext();
-
-            var orders = await db.Orders.AsNoTracking()
-                         .Include(o => o.Customer)
-                         .Include(o => o.OrderRows)
-                         .OrderByDescending(o => o.OrderId)
-                         .ToListAsync();
-            foreach (var order in orders)
-            {
-                Console.WriteLine($"{order.OrderId} | {order.Customer?.Email}");
-            }
-        }
+        // List all orders
         public static async Task ShowOrdersAsync()
         {
             using var db = new StoreContext();
@@ -35,17 +23,20 @@ namespace DATABASPROJEKT.Helpers
                 .ToListAsync();
 
             Console.WriteLine("-------------------");
-            Console.WriteLine(" OrderId | OrderDate | CustomerName | Status | TotalAmount | Category ");
+            Console.WriteLine(" OrderId | OrderDate | CustomerName | Status | TotalAmount ");
             foreach (var order in orders)
             {
-                Console.WriteLine($"{order.OrderId} | {order.OrderDate.ToShortDateString()} | {order.Customer?.Name} | {order.Status} | {order.TotalAmount:C}");
+                Console.WriteLine($"{order.OrderId} | {order.OrderDate.ToShortDateString()} | {order.Customer?.Name} | {order.Status} | {order.TotalAmount:C} ");
             }
             Console.WriteLine("-------------------");
         }
-        public static async Task ShowOrderDetailsAsync()
+
+        // Show details of a specific order
+        public static async Task ShowOrderDetailsAsync(int DiD)
         {
             Console.WriteLine("Current Orders: ");
             await ShowOrdersAsync();
+
 
             Console.WriteLine("Enter Order ID to view details: ");
             if (!int.TryParse(Console.ReadLine(), out var orderId))
@@ -86,7 +77,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine($"Customer Name: {order.Customer?.Name}");
             Console.WriteLine($"Status: {order.Status}");
             Console.WriteLine($"Total Amount: {order.TotalAmount:C}");
-            Console.WriteLine($"Category: - Lägg till category -");
+            Console.WriteLine($"Category: {order.Categorie}");
             Console.WriteLine("Order lines:");
             if (order.OrderRows != null && order.OrderRows.Any())
             {
@@ -94,7 +85,7 @@ namespace DATABASPROJEKT.Helpers
                 {
                     var productName = row.Product?.ProductName ?? $"ProductId:{row.ProductId}";
                     var lineTotal = row.UnitPrice * row.Quantity;
-                    Console.WriteLine($" - {productName} | Qty: {row.Quantity} | UnitPrice: {row.UnitPrice:C} | LineTotal: {lineTotal:C}");
+                    Console.WriteLine($" - {productName} | Qty: {row.Quantity} | UnitPrice: {row.UnitPrice:C} | LineTotal: {lineTotal:C}| Category: {row.Categorie} ");
                 }
             }
             else
@@ -104,6 +95,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine("-------------------");
         }
 
+        // Add a new order
         public static async Task AddOrderAsync()
         {
             using var db = new StoreContext();
@@ -238,6 +230,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Filtrera orders på t.ex. "Pending", "Paid", "Shipped"
         public static async Task OrdersByStatusAsync()
         {
             using var db = new StoreContext();
@@ -246,6 +239,7 @@ namespace DATABASPROJEKT.Helpers
 
         }
 
+        // Visa alla orders för en viss kund
         public static async Task OrdersByCustomerAsync()
         {
             using var db = new StoreContext();

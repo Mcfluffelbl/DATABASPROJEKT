@@ -3,6 +3,7 @@ using System;
 using DATABASPROJEKT;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATABASPROJEKT.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    partial class StoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251210201049_OrderRowCategoryMigrat")]
+    partial class OrderRowCategoryMigrat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -157,10 +160,6 @@ namespace DATABASPROJEKT.Migrations
                     b.Property<int>("CategorieId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CategorieName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
@@ -227,7 +226,7 @@ namespace DATABASPROJEKT.Migrations
                     b.HasOne("DATABASPROJEKT.Models.Categorie", "Categorie")
                         .WithMany("Products")
                         .HasForeignKey("CategorieId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Categorie");

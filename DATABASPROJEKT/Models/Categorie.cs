@@ -16,8 +16,12 @@ namespace DATABASPROJEKT.Models
         // Required = not allowed to be null
         // Maxlenght = generates a column with max length 100 + used in validation
         [Required, MaxLength(100)]
-        public string CategorieName { get; set; } = null!;
-        // One Categorie can have many Products
+        public string CategorieName { get; set; } = string.Empty;
+
+        // Add navigation for OrderRows so WithMany(c => c.OrderRows) compiles
+        public List<OrderRow> OrderRows { get; set; } = new();
+
+        // If you also want products
         public List<Product> Products { get; set; } = new();
     }
 }

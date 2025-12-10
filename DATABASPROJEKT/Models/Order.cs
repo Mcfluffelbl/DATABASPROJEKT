@@ -9,7 +9,7 @@ using DATABASPROJEKT.Enum;
 namespace DATABASPROJEKT.Models
 {
     public class Order
-    {
+    { 
         // PK
         public int OrderId { get; set; }
 

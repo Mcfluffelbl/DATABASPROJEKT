@@ -143,6 +143,7 @@ namespace DATABASPROJEKT.Helpers
             using var db = new StoreContext();
             var product = await db.Products
                 .AsNoTracking()
+                .Include(c => c.Categorie)
                 .FirstOrDefaultAsync(p => p.ProductId == productId);
             if (product == null)
             {
@@ -154,7 +155,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine($"Name: {product.ProductName}");
             Console.WriteLine($"Price: {product.Price}");
             Console.WriteLine($"Stock Quantity: {product.StockQuantity}");
-            Console.WriteLine($"Category ID: {product.CategorieId}");
+            Console.WriteLine($"Category: {product.Categorie?.CategorieName}");
             Console.WriteLine("----------------------------");
         }
 

@@ -26,6 +26,7 @@ namespace DATABASPROJEKT.Models
         // Foreign Key to Categorie
         [ForeignKey(nameof(CategorieId))]
         public int CategorieId { get; set; }
+        public string CategorieName { get; set; } = string.Empty;
         // Navigation property
         [ForeignKey("CategorieId")]
         public Categorie? Categorie { get; set; }
