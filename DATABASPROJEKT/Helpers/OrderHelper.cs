@@ -110,7 +110,7 @@ namespace DATABASPROJEKT.Helpers
 
             // Show existing customers to choose from
             Console.WriteLine("Current Customers: ");
-            await ShowCustomersAsync();
+            await CustomerHelper.ShowCustomersAsync();
 
             // Let user input data for new order, asks for CustomerId
             Console.WriteLine("Enter Customer ID for the order: ");
@@ -130,30 +130,30 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
-            Console.WriteLine("Choose Order Status:");
-            foreach (var value in Enum.GetValues(typeof(Status)))
-            {
-                Console.WriteLine($"{(int)value}. {value}");
-            }
+            //Console.WriteLine("Choose Order Status:");
+            //foreach (var value in Enum.GetValues(typeof(Status)))
+            //{
+            //    Console.WriteLine($"{(int)value}. {value}");
+            //}
 
-            Console.Write("> ");
+            //Console.Write("> ");
 
-            if (!int.TryParse(Console.ReadLine(), out var input) ||
-                !Enum.IsDefined(typeof(Status), input))
-            {
-                Console.WriteLine("Invalid status selection.");
-                Console.WriteLine("----------------------------");
-                return;
-            }
+            //if (!int.TryParse(Console.ReadLine(), out var input) ||
+            //    !Enum.IsDefined(typeof(Status), input))
+            //{
+            //    Console.WriteLine("Invalid status selection.");
+            //    Console.WriteLine("----------------------------");
+            //    return;
+            //}
 
-            Status choice = (Status)input;
+            //Status choice = (Status)input;
 
             // Add Products to order
             var orderRows = new List<OrderRow>();
             while (true)
             {
                 Console.WriteLine("Current Products: ");
-                await ShowProductsAsync();
+                await ProductHelper.ShowProductsAsync();
 
                 Console.WriteLine("Enter Product ID to add to order (or leave blank to finish): ");
                 var prodInput = Console.ReadLine()?.Trim();
@@ -194,7 +194,7 @@ namespace DATABASPROJEKT.Helpers
                 {
                     ProductId = product.ProductId,
                     Quantity = quantity,
-                    Status = choice,
+                    //Status = choice,
                     UnitPrice = product.Price
                 });
 
@@ -218,7 +218,7 @@ namespace DATABASPROJEKT.Helpers
             {
                 CustomerId = customerId,
                 OrderDate = orderDate,
-                Status = choice,
+                //Status = choice,
                 TotalAmount = totalAmount,
                 OrderRows = orderRows
             };
@@ -281,6 +281,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // List all order summaries
         public static async Task ListOrderSummary()
         {
             using var db = new StoreContext();
@@ -291,6 +292,144 @@ namespace DATABASPROJEKT.Helpers
             foreach (var summary in summaries)
             {
                 Console.WriteLine($"{summary.OrderId} | {summary.OrderDate} | {summary.TotalAmount} | {summary.CustomerEmail}");
+            }
+        }
+
+        // Show details of a specific order summary
+        public static async Task ShowOrderSummaryDetailsAsync()
+        {
+            Console.WriteLine("Current Order Summaries: ");
+            await ListOrderSummary();
+            Console.WriteLine("Enter Order ID to view summary details: ");
+            if (!int.TryParse(Console.ReadLine(), out var orderId))
+            {
+                Console.WriteLine("Invalid Order ID.");
+                Console.WriteLine("----------------------------");
+                return;
+            }
+            using var db = new StoreContext();
+            var summary = await db.OrderSummaries.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (summary == null)
+            {
+                Console.WriteLine("Order summary not found.");
+                Console.WriteLine("----------------------------");
+                return;
+            }
+            Console.WriteLine("-------------------");
+            Console.WriteLine($"Order ID: {summary.OrderId}");
+            Console.WriteLine($"Order Date: {summary.OrderDate.ToShortDateString()}");
+            Console.WriteLine($"Total Amount: {summary.TotalAmount:C}");
+            Console.WriteLine($"Customer Email: {summary.CustomerEmail}");
+            Console.WriteLine("-------------------");
+        }
+
+        // Delete order and its associated order rows
+        public static async Task DeleteOrderAsync(int orderId)
+        {
+            using var db = new StoreContext();
+            var order = await db.Orders
+                .Include(o => o.OrderRows)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                Console.WriteLine("Order not found.");
+                Console.WriteLine("----------------------------");
+                return;
+            }
+            db.OrderRows.RemoveRange(order.OrderRows);
+            db.Orders.Remove(order);
+            try
+            {
+                await db.SaveChangesAsync();
+                Console.WriteLine("Order deleted successfully!");
+                Console.WriteLine("----------------------------");
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("DB ERROR: " + ex.GetBaseException().Message);
+                Console.WriteLine("----------------------------");
+            }
+        }
+
+        public static async Task UpdateOrderStatusAsync(int orderId, Status newStatus)
+        {
+            using var db = new StoreContext();
+            var order = await db.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                Console.WriteLine("Order not found.");
+                Console.WriteLine("----------------------------");
+                return;
+            }
+            order.Status = newStatus;
+            try
+            {
+                await db.SaveChangesAsync();
+                Console.WriteLine("Order status updated successfully!");
+                Console.WriteLine("----------------------------");
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("DB ERROR: " + ex.GetBaseException().Message);
+                Console.WriteLine("----------------------------");
+            }
+        }
+
+        public static async Task ShowOrdersWithDetailsAsync()
+        {
+            using var db = new StoreContext();
+            var orders = await db.Orders
+                .AsNoTracking()
+                .Include(o => o.Customer)
+                .Include(o => o.OrderRows)
+                    .ThenInclude(or => or.Product)
+                .OrderBy(o => o.OrderId)
+                .ToListAsync();
+            Console.WriteLine("-------------------");
+            foreach (var order in orders)
+            {
+                Console.WriteLine($"Order ID: {order.OrderId} | Customer: {order.Customer?.Name} | Date: {order.OrderDate.ToShortDateString()} | Status: {order.Status} | Total: {order.TotalAmount:C}");
+                Console.WriteLine(" Order Lines:");
+                foreach (var row in order.OrderRows)
+                {
+                    var productName = row.Product?.ProductName ?? $"ProductId:{row.ProductId}";
+                    var lineTotal = row.UnitPrice * row.Quantity;
+                    Console.WriteLine($"Product Name: {productName} | Quantity: {row.Quantity} | Unit Price: {row.UnitPrice:C} | LineTotal: {lineTotal:C}");
+                }
+                Console.WriteLine("-------------------");
+            }
+        }
+
+        public static async Task<int> GetTotalOrderCountAsync()
+        {
+            using var db = new StoreContext();
+            return await db.Orders.CountAsync();
+        }
+
+        // Edit existing order
+        public static async Task EditOrderAsync(int idD)
+        {
+            using var db = new StoreContext();
+            // Get OrderId to edit the chosen order
+            var order = await db.Orders.FirstOrDefaultAsync(x => x.OrderId == idD);
+            if (order == null)
+            {
+                Console.WriteLine("Order not found");
+                Console.WriteLine("----------------------------");
+                return;
+            }
+            // Implement editing logic here
+            order.OrderId = idD;
+            try
+            {
+                await db.SaveChangesAsync();
+                Console.WriteLine("Order edited successfully!");
+                Console.WriteLine("----------------------------");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                Console.WriteLine("----------------------------");
             }
         }
     }

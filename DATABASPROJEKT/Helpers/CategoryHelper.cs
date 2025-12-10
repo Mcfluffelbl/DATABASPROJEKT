@@ -48,11 +48,11 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine("-------------------");
         }
 
-        public static async Task EditCategoryAsync(int id)
+        public static async Task EditCategoryAsync(int idD)
         {
             using var db = new StoreContext();
             // Get CategoryId to edit the chosen category
-            var category = await db.Categories.FirstOrDefaultAsync(x => x.CategorieId == id);
+            var category = await db.Categories.FirstOrDefaultAsync(x => x.CategorieId == idD);
             if (category == null)
             {
                 Console.WriteLine("Category not found");

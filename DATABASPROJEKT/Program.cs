@@ -58,114 +58,209 @@ using (var db = new StoreContext())
         await db.SaveChangesAsync();
         Console.WriteLine("Seeded db!");
     }
-
-
 }
-
 while (true)
 {
     Console.WriteLine("\n=============================");
-    Console.WriteLine("=== ShoppingApp Main Menu ===");
-    Console.WriteLine("\n Commands: 1. Customerlist | 2. View Orders | 3. Add Customer | 4. Edit Customer <ID> | 5. Delete Customer <ID> | 7. Order Details | 8. Add Order | 9. Add Product | 10. Product List | 11. ordersbystatus <status> | 12. ordersbycustomer <customerId> | 13. orderspage <page> <pageSize> | 14. Order List | 15. List Order | 0. Exit |");
+    Console.WriteLine("=== Main Menu ===");
+    Console.WriteLine("\n Commands: 1. Customer | 2. Orders | 3. Products | 4. Categories | 5. Exit ");
     Console.WriteLine("Enter your choice: ");
+    Console.WriteLine("> ");
     var line = Console.ReadLine()?.Trim() ?? string.Empty;
-
-    // Jump out of loop if empty input
     if (string.IsNullOrEmpty(line))
-    {
-        continue;
-    }
-
-    // End loop and exit program
-    if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
-    {
         break;
-    }
-
-    // Split input into parts
+    if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
+        break;
     var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     var cmd = parts[0].ToLowerInvariant();
-    // Easy switch between commands
     switch (cmd)
     {
         case "1":
-        case "customerlist":
-            await CustomerHelper.ShowCustomersAsync();
+        case "customer":
+            await CustomerAsync();
             break;
         case "2":
-        case "vieworders":
-            await OrderHelper.ShowOrdersAsync();
+        case "orders":
+            await OrdersAsync();
             break;
         case "3":
-        case "addcustomer":
-            await CustomerHelper.AddCustomerAsync();
+        case "products":
+            await ProductsAsync();
             break;
         case "4":
-        case "editcustomer":
-            if (parts.Length < 2 || !int.TryParse(parts[1], out var id))
-            {
-                Console.WriteLine("Usage: Edit <id>");
-                break;
-            }
-            await CustomerHelper.EditCustomerAsync(id);
-            break;
-        case "5":
-        case "deletecustomer":
-            // Delete a Customer
-            if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
-            {
-                Console.WriteLine("Usage: Delete <id>");
-                break;
-            }
-            await CustomerHelper.DeleteCustomerAsync(idD);
-            break;
-        case "7":
-        case "orderdetails":
-            await OrderHelper.ShowOrderDetailsAsync();
-            break;
-        case "8":
-        case "addorder":
-            await OrderHelper.AddOrderAsync();
-            break;
-        case "9":
-        case "addproduct":
-            await ProductHelper.AddProductAsync();
-            break;
-        case "10":
-        case "showproduct":
-            await ProductHelper.ShowProductsAsync();
-            break;
-        case "11":
-            await OrderHelper.OrdersByStatusAsync();
-            break;
-        case "12":
-            await OrderHelper.OrdersByCustomerAsync();
-            break;
-        case "13":
-            if (parts.Length < 3 || !int.TryParse(parts[1], out var page) || !int.TryParse(parts[2], out var pageSize))
-            {
-                Console.WriteLine("Usage: orderspage <page> <pageSize>");
-                break;
-            }
-            await OrderHelper.OrdersPageAsync(page, pageSize);
-            break;
-        case "14":
-            await OrderHelper.ListOrderSummary();
-            break;
-        case "15":
-            await OrderHelper.ListOrderAsync();
+        case "categorys":
+            await CategoriesAsync();
             break;
         default:
             Console.WriteLine("Unknown command. Please try again.");
             break;
     }
+    break;
 }
 return;
 
-static async Task ManageCategoriesAsync()
+// Customer Menu
+static async Task CustomerAsync()
 {
     while (true)
     {
+        Console.WriteLine("\n=============================");
+        Console.WriteLine("\n=== Customer Management ===");
+        Console.WriteLine("Commands: 1. List Customers | 2. Add Customer | 3. Edit Customer <ID> | 4. Delete Customer <ID> | 5. Back to Main Menu");
+        Console.WriteLine("Enter your choice: ");
+        var line = Console.ReadLine()?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(line))
+            continue;
+        if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
+            break;
+        var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var cmd = parts[0].ToLowerInvariant();
+        switch (cmd)
+        {
+            case "1":
+            case "listcustomers":
+                await CustomerHelper.ShowCustomersAsync();
+                break;
+            case "2":
+            case "addcustomer":
+                await CustomerHelper.AddCustomerAsync();
+                break;
+            case "3":
+            case "editcustomer":
+                await CustomerHelper.EditCustomerAsync(int.Parse(parts[1]));
+                break;
+            case "4":
+            case "deletecustomer":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var id))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await CustomerHelper.DeleteCustomerAsync(id);
+                break;
+            default:
+                Console.WriteLine("Unknown command. Please try again.");
+                break;
+        }
+    }
+}
+
+// Orders Menu
+static async Task OrdersAsync()
+{
+    while (true)
+    {
+        Console.WriteLine("\n=============================");
+        Console.WriteLine("\n=== Order Management ===");
+        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 0. Back to Main Menu");
+        Console.WriteLine("Enter your choice: ");
+        var line = Console.ReadLine()?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(line))
+            continue;
+        if (line.Equals("0", StringComparison.OrdinalIgnoreCase))
+            break;
+        var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var cmd = parts[0].ToLowerInvariant();
+        switch (cmd)
+        {
+            case "1":
+            case "listorders":
+                await OrderHelper.ShowOrdersAsync();
+                break;
+            case "2":
+            case "addorder":
+                await OrderHelper.AddOrderAsync();
+                break;
+            case "3":
+            case "editorder":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await OrderHelper.EditOrderAsync(idD);
+                break;
+            case "4":
+            case "deleteorder":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var id))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await OrderHelper.DeleteOrderAsync(id);
+                break;
+            default:
+                Console.WriteLine("Unknown command. Please try again.");
+                break;
+        }
+    }
+}
+
+// Products Menu
+static async Task ProductsAsync()
+{
+    while (true)
+    {
+        Console.WriteLine("\n=============================");
+        Console.WriteLine("\n=== Product Management ===");
+        Console.WriteLine("Commands: 1. List Products | 2. Add Product | 3. Edit Product <ID> | 4. Delete Product <ID> | 5. Show Product Details | 6. Back to Main Menu");
+        Console.WriteLine("Enter your choice: ");
+        var line = Console.ReadLine()?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(line))
+            continue;
+        if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
+            break;
+        var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var cmd = parts[0].ToLowerInvariant();
+        switch (cmd)
+        {
+            case "1":
+            case "listproducts":
+                await ProductHelper.ShowProductsAsync();
+                break;
+            case "2":
+            case "addproduct":
+                await ProductHelper.AddProductAsync();
+                break;
+            case "3":
+            case "editproduct":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await ProductHelper.EditProductAsync(idD);
+                break;
+            case "4":
+            case "deleteproduct":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var id))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await ProductHelper.DeleteProductAsync(id);
+                break;
+            case "5":
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var productId))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await ProductHelper.ShowProductDetailsAsync(productId);
+                break;
+            default:
+                Console.WriteLine("Unknown command. Please try again.");
+                break;
+        }
+    }
+}
+
+// Categories Menu
+static async Task CategoriesAsync()
+{
+    while (true)
+    {
+        Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Category Management ===");
         Console.WriteLine("Commands: 1. List Categories | 2. Add Category | 3. Edit Category <ID> | 4. Delete Category <ID> | 0. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
@@ -188,7 +283,12 @@ static async Task ManageCategoriesAsync()
                 break;
             case "3":
             case "editcategory":
-                await CategoryHelper.EditCategoryAsync(int.Parse(parts[1]));
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var idD))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await CategoryHelper.EditCategoryAsync(idD);
                 break;
             case "4":
             case "deletecategory":
