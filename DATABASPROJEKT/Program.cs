@@ -720,7 +720,12 @@ static async Task ManageCategoriesAsync()
                 break;
             case "4":
             case "deletecategory":
-                await DeleteCategoryAsync(int.Parse(parts[1]));
+                if (parts.Length < 2 || !int.TryParse(parts[1], out var id))
+                {
+                    Console.WriteLine("Usage: Delete <id>");
+                    break;
+                }
+                await DeleteCategoryAsync(id);
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");
