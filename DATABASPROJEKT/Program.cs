@@ -3,6 +3,7 @@ using DATABASPROJEKT;
 using DATABASPROJEKT.Enum;
 using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
+using DATABASPROJEKT.Helpers;
 
 Console.WriteLine("DB: " + Path.Combine(AppContext.BaseDirectory, "shop.db"));
 Console.WriteLine("Welcome To Youre ShoppingApp!");
@@ -89,15 +90,15 @@ while (true)
     {
         case "1":
         case "customerlist":
-            await ShowCustomersAsync();
+            await CustomerHelper.ShowCustomersAsync();
             break;
         case "2":
         case "vieworders":
-            await ShowOrdersAsync();
+            await OrderHelper.ShowOrdersAsync();
             break;
         case "3":
         case "addcustomer":
-            await AddCustomerAsync();
+            await CustomerHelper.AddCustomerAsync();
             break;
         case "4":
         case "editcustomer":
@@ -106,7 +107,7 @@ while (true)
                 Console.WriteLine("Usage: Edit <id>");
                 break;
             }
-            await EditCustomerAsync(id);
+            await CustomerHelper.EditCustomerAsync(id);
             break;
         case "5":
         case "deletecustomer":
@@ -116,29 +117,29 @@ while (true)
                 Console.WriteLine("Usage: Delete <id>");
                 break;
             }
-            await DeleteCustomerAsync(idD);
+            await CustomerHelper.DeleteCustomerAsync(idD);
             break;
         case "7":
         case "orderdetails":
-            await ShowOrderDetailsAsync();
+            await OrderHelper.ShowOrderDetailsAsync();
             break;
         case "8":
         case "addorder":
-            await AddOrderAsync();
+            await OrderHelper.AddOrderAsync();
             break;
         case "9":
         case "addproduct":
-            await AddProductAsync();
+            await ProductHelper.AddProductAsync();
             break;
         case "10":
         case "showproduct":
-            await ShowProductsAsync();
+            await ProductHelper.ShowProductsAsync();
             break;
         case "11":
-            await OrdersByStatusAsync();
+            await OrderHelper.OrdersByStatusAsync();
             break;
         case "12":
-            await OrdersByCustomerAsync();
+            await OrderHelper.OrdersByCustomerAsync();
             break;
         case "13":
             if (parts.Length < 3 || !int.TryParse(parts[1], out var page) || !int.TryParse(parts[2], out var pageSize))
@@ -146,13 +147,13 @@ while (true)
                 Console.WriteLine("Usage: orderspage <page> <pageSize>");
                 break;
             }
-            await OrdersPageAsync(page, pageSize);
+            await OrderHelper.OrdersPageAsync(page, pageSize);
             break;
         case "14":
-            await ListOrderSummary();
+            await OrderHelper.ListOrderSummary();
             break;
         case "15":
-            await ListOrderAsync();
+            await OrderHelper.ListOrderAsync();
             break;
         default:
             Console.WriteLine("Unknown command. Please try again.");
@@ -160,535 +161,6 @@ while (true)
     }
 }
 return;
-
-static async Task ListOrderAsync()
-{
-    using var db = new StoreContext();
-
-    var orders = await db.Orders.AsNoTracking()
-                 .Include(o => o.Customer)
-                 .Include(o => o.OrderRows)
-                 .OrderByDescending(o => o.OrderId)
-                 .ToListAsync();
-    foreach (var order in orders)
-    {
-        Console.WriteLine($"{order.OrderId} | {order.Customer?.Email}");
-    }
-}
-
-static async Task ListOrderSummary()
-{
-    using var db = new StoreContext();
-
-    var summaries = await db.OrderSummaries.OrderByDescending(e => e.OrderDate).ToListAsync();
-
-    Console.WriteLine("OrderId | OrderDate | TotalAmount SEK | Customer Email");
-    foreach (var summary in summaries)
-    {
-        Console.WriteLine($"{summary.OrderId} | {summary.OrderDate} | {summary.TotalAmount} | {summary.CustomerEmail}");
-    }
-}
-
-static async Task ShowCustomersAsync()
-{
-    using var db = new StoreContext();
-
-    // AsTracking = faster for read-only scenation. (No change tracking)
-    var rows = await db.Customers.AsNoTracking().OrderBy(customers => customers.CustomerId).ToListAsync();
-    Console.WriteLine("-------------------");
-    Console.WriteLine("CustomerId | Name | Email | City ");
-    foreach (var row in rows)
-    {
-        Console.WriteLine($"{row.CustomerId} | {row.Name} | {row.Email} | {row.City}");
-    }
-    Console.WriteLine("-------------------");
-}
-
-static async Task ShowOrdersAsync()
-{
-    using var db = new StoreContext();
-    var orders = await db.Orders
-        .AsNoTracking()
-        .Include(x => x.Customer) // Eager loading of Customer
-        .OrderBy(x => x.OrderId)
-        .ToListAsync();
-
-    Console.WriteLine("-------------------");
-    Console.WriteLine(" OrderId | OrderDate | CustomerName | Status | TotalAmount | Category ");
-    foreach (var order in orders)
-    {
-        Console.WriteLine($"{order.OrderId} | {order.OrderDate.ToShortDateString()} | {order.Customer?.Name} | {order.Status} | {order.TotalAmount:C}");
-    }
-    Console.WriteLine("-------------------");
-}
-
-static async Task AddCustomerAsync()
-{
-    Console.WriteLine("Enter customer name: ");
-    var name = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(name) || name.Length > 100)
-    {
-        Console.WriteLine("Name is required (Max 100)");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Enter customer email: ");
-    var email = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(email) || email.Length > 100)
-    {
-        Console.WriteLine("Email is required (Max 100)");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Enter customer city: ");
-    var city = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(city) || city.Length > 100)
-    {
-        Console.WriteLine("City is required (Max 100)");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    using var db = new StoreContext();
-    db.Customers.Add(new Customer { Name = name, Email = email, City = city });
-    try
-    {
-        // Save our changes: Trigger an INSERT + all validation/constraints in the database
-        await db.SaveChangesAsync();
-        Console.WriteLine("Customer added!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException exception)
-    {
-        Console.WriteLine("Error adding customer: " + exception.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-    Console.WriteLine("Customer added successfully!");
-}
-
-static async Task EditCustomerAsync(int id)
-{
-    using var db = new StoreContext();
-
-    // Get CustomerId to edit the chosen customer
-    var customer = await db.Customers.FirstOrDefaultAsync(x => x.CustomerId == id);
-    if (customer == null)
-    {
-        Console.WriteLine("Customer not found");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Uppdate Name for specefik customer
-    Console.WriteLine($"Current Name: {customer.Name} (ID: {customer.CustomerId}");
-    Console.WriteLine("New Name (leave blank to keep current): ");
-    var name = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (!string.IsNullOrEmpty(name))
-    {
-        if (name.Length > 100)
-        {
-            Console.WriteLine("Name cannot exceed 100 characters.");
-            return;
-        }
-        customer.Name = name;
-    }
-
-    // Uppdate Email for specefik customer
-    Console.WriteLine($"Current email: {customer.Email}");
-    Console.WriteLine("Enter new email (leave blank to keep current): ");
-    var email = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (!string.IsNullOrEmpty(email))
-    {
-        if (email.Length > 100)
-        {
-            Console.WriteLine("Email cannot exceed 100 characters.");
-            return;
-        }
-        customer.Email = email;
-    }
-
-    // Uppdate City for specefik customer
-    Console.WriteLine($"Current City: {customer.City}");
-    Console.WriteLine("Enter new city (leave blank to keep current): ");
-    var city = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (!string.IsNullOrEmpty(city))
-    {
-        if (city.Length > 100)
-        {
-            Console.WriteLine("City cannot exceed 100 characters.");
-            return;
-        }
-        customer.City = city;
-    }
-
-    // Uppdate DB:N with our changes
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Customer edited and updated successfully!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException exception)
-    {
-        Console.WriteLine("Error updating customer: " + exception.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task DeleteCustomerAsync(int id)
-{
-    using var db = new StoreContext();
-    var customer = await db.Customers.FirstOrDefaultAsync(c => c.CustomerId == id);
-    if (customer == null)
-    {
-        Console.WriteLine("Customer not found!");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Customer delete
-    db.Customers.Remove(customer);
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Customer Deleted!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (Exception exception)
-    {
-        Console.WriteLine(exception.Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task ShowOrderDetailsAsync()
-{
-    Console.WriteLine("Current Orders: ");
-    await ShowOrdersAsync();
-
-    Console.WriteLine("Enter Order ID to view details: ");
-    if (!int.TryParse(Console.ReadLine(), out var orderId))
-    {
-        Console.WriteLine("Invalid Order ID.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    using var db = new StoreContext();
-
-    // Load a single order including customer and order row -> product details
-    var order = await db.Orders
-        .AsNoTracking()
-        .Include(o => o.Customer)
-        .Include(o => o.OrderRows)
-            .ThenInclude(or => or.Product)
-        .FirstOrDefaultAsync(o => o.OrderId == orderId);
-
-    if (order == null)
-    {
-        Console.WriteLine("Order not found.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Lägg till så att det finns : Sortering och filtrering: o ordersbystatus<status> → filtrera orders på t.ex. "Pending", "Paid", "Shipped" o ordersbycustomer<customerId> → visa alla orders för en viss kund
-
-
-    // Paginering:
-    // o orderspage<page> < pageSize > → lista orders sida för sida med Skip och
-    // Take, sorterade t.ex.på OrderDate.
-
-
-    Console.WriteLine("-------------------");
-    Console.WriteLine($"Order ID: {order.OrderId}");
-    Console.WriteLine($"Order Date: {order.OrderDate.ToShortDateString()}");
-    Console.WriteLine($"Customer Name: {order.Customer?.Name}");
-    Console.WriteLine($"Status: {order.Status}");
-    Console.WriteLine($"Total Amount: {order.TotalAmount:C}");
-    Console.WriteLine($"Category: - Lägg till category -");
-    Console.WriteLine("Order lines:");
-    if (order.OrderRows != null && order.OrderRows.Any())
-    {
-        foreach (var row in order.OrderRows)
-        {
-            var productName = row.Product?.ProductName ?? $"ProductId:{row.ProductId}";
-            var lineTotal = row.UnitPrice * row.Quantity;
-            Console.WriteLine($" - {productName} | Qty: {row.Quantity} | UnitPrice: {row.UnitPrice:C} | LineTotal: {lineTotal:C}");
-        }
-    }
-    else
-    {
-        Console.WriteLine(" (No order rows)");
-    }
-    Console.WriteLine("-------------------");
-}
-
-static async Task AddOrderAsync()
-{
-    using var db = new StoreContext();
-
-    // Show existing customers to choose from
-    Console.WriteLine("Current Customers: ");
-    await ShowCustomersAsync();
-
-    // Let user input data for new order, asks for CustomerId
-    Console.WriteLine("Enter Customer ID for the order: ");
-    if (!int.TryParse(Console.ReadLine(), out var customerId))
-    {
-        Console.WriteLine("Invalid Customer ID.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Let user input date data for new order
-    Console.WriteLine("Enter Order Date (yyyy-MM-dd): ");
-    if (!DateTime.TryParse(Console.ReadLine(), out var orderDate))
-    {
-        Console.WriteLine("Invalid date format.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Choose Order Status:");
-    foreach (var value in Enum.GetValues(typeof(Status)))
-    {
-        Console.WriteLine($"{(int)value}. {value}");
-    }
-
-    Console.Write("> ");
-
-    if (!int.TryParse(Console.ReadLine(), out var input) ||
-        !Enum.IsDefined(typeof(Status), input))
-    {
-        Console.WriteLine("Invalid status selection.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Status choice = (Status)input;
-
-    // Add Products to order
-    var orderRows = new List<OrderRow>();
-    while (true)
-    {
-        Console.WriteLine("Current Products: ");
-        await ShowProductsAsync();
-
-        Console.WriteLine("Enter Product ID to add to order (or leave blank to finish): ");
-        var prodInput = Console.ReadLine()?.Trim();
-        if (string.IsNullOrEmpty(prodInput))
-            break;
-
-        if (!int.TryParse(prodInput, out var productId))
-        {
-            Console.WriteLine("Invalid Product ID.");
-            Console.WriteLine("----------------------------");
-            continue;
-        }
-
-        var product = await db.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
-        if (product == null)
-        {
-            Console.WriteLine("Product not found.");
-            Console.WriteLine("----------------------------");
-            continue;
-        }
-
-        Console.WriteLine($"Enter quantity for {product.ProductName}: ");
-        if (!int.TryParse(Console.ReadLine(), out var quantity) || quantity <= 0)
-        {
-            Console.WriteLine("Invalid quantity.");
-            Console.WriteLine("----------------------------");
-            continue;
-        }
-
-        if (quantity > product.StockQuantity)
-        {
-            Console.WriteLine("Not enough in stock.");
-            Console.WriteLine("----------------------------");
-            continue;
-        }
-
-        orderRows.Add(new OrderRow
-        {
-            ProductId = product.ProductId,
-            Quantity = quantity,
-            Status = choice,
-            UnitPrice = product.Price
-        });
-
-        Console.WriteLine("Add another product? (y/n): ");
-        var another = Console.ReadLine()?.Trim().ToLowerInvariant();
-        if (another != "y")
-            break;
-    }
-    if (orderRows.Count == 0)
-    {
-        Console.WriteLine("No products added to order.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Calculate and save TotalAmount correctly
-    var totalAmount = orderRows.Sum(row => row.UnitPrice * row.Quantity);
-
-    // Create new order object and attach order rows
-    var order = new Order
-    {
-        CustomerId = customerId,
-        OrderDate = orderDate,
-        Status = choice,
-        TotalAmount = totalAmount,
-        OrderRows = orderRows
-    };
-
-    db.Orders.Add(order);
-
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Order added successfully!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException ex)
-    {
-        Console.WriteLine("DB ERROR: " + ex.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task AddProductAsync()
-{
-    using var db = new StoreContext();
-
-    Console.WriteLine("Current Products: ");
-    await ShowProductsAsync();
-
-    // Let user input data for new product name
-    Console.WriteLine("Enter Product Name: ");
-    var productname = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(productname) || productname.Length > 100)
-    {
-        Console.WriteLine("Invalid Product Name.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Enter Product Price: ");
-    if (!decimal.TryParse(Console.ReadLine(), out var productprice))
-    {
-        Console.WriteLine("Invalid amount.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Enter Product Quantity: ");
-    if (!int.TryParse(Console.ReadLine(), out var productquantity))
-    {
-        Console.WriteLine("Invalid amount quantity amount.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    Console.WriteLine("Current Categories: ");
-    // Visa kategorier
-
-    Console.WriteLine("Enter Product Category: ");
-    if (!int.TryParse(Console.ReadLine(), out var categorieId))
-    {
-        Console.WriteLine("Invalid Category ID.");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-
-    // Create new product
-    var product = new Product
-    {
-        ProductName = productname,
-        Price = productprice,
-        StockQuantity = productquantity,
-        CategorieId = categorieId
-    };
-
-    db.Products.Add(product);
-
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Product added successfully!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException ex)
-    {
-        Console.WriteLine("DB ERROR: " + ex.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task ShowProductsAsync()
-{
-    using var db = new StoreContext();
-
-    var products = await db.Products
-        .AsNoTracking()
-        .ToListAsync();
-
-    Console.WriteLine("-------------------");
-    Console.WriteLine("Product Id | Product Name | Product Price | Stock Quantity");
-    foreach (var product in products)
-    {
-        Console.WriteLine($"{product.ProductId} | {product.ProductName} | {product.Price} | {product.StockQuantity}");
-    }
-    Console.WriteLine("-------------------");
-}
-
-static async Task OrdersByStatusAsync()
-{
-    using var db = new StoreContext();
-
-    // Filtrera orders på t.ex. "Pending", "Paid", "Shipped"
-
-}
-
-static async Task OrdersByCustomerAsync()
-{
-    using var db = new StoreContext();
-
-    // Visa alla orders för en viss kund
-    Console.WriteLine("");
-}
-
-// Lista orders sida för sida med Skip och Take, sorterade t.ex.på OrderDate. + ADD I CASE!!!!
-static async Task OrdersPageAsync(int page, int pageSize)
-{
-    using var db = new StoreContext();
-
-    // LINQ - Sort + Ordering
-    var query = db.Orders
-                    .Include(b => b.Customer)
-                    .AsNoTracking()
-                    .OrderBy(b => b.OrderDate);
-
-    var totalCount = await query.CountAsync();
-    var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-    var Orders = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-    Console.WriteLine($"Page {page}/{totalPages}, pagesize={pageSize}");
-
-    foreach (var order in Orders)
-    {
-        Console.WriteLine($"{order.OrderId} - {order.CustomerId} - {order.OrderDate} | {order.Customer?.Name}");
-    }
-}
-
-// Lägg till kategorier method här...
-// I kategori metod ska du kunna lägga till, redigera, ta bort och lista kategorier.
 
 static async Task ManageCategoriesAsync()
 {
@@ -708,15 +180,15 @@ static async Task ManageCategoriesAsync()
         {
             case "1":
             case "listcategories":
-                await ListCategoriesAsync();
+                await CategoryHelper.ListCategoriesAsync();
                 break;
             case "2":
             case "addcategory":
-                await AddCategoryAsync();
+                await CategoryHelper.AddCategoryAsync();
                 break;
             case "3":
             case "editcategory":
-                await EditCategoryAsync(int.Parse(parts[1]));
+                await CategoryHelper.EditCategoryAsync(int.Parse(parts[1]));
                 break;
             case "4":
             case "deletecategory":
@@ -725,7 +197,7 @@ static async Task ManageCategoriesAsync()
                     Console.WriteLine("Usage: Delete <id>");
                     break;
                 }
-                await DeleteCategoryAsync(id);
+                await CategoryHelper.DeleteCategoryAsync(id);
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");
@@ -734,111 +206,3 @@ static async Task ManageCategoriesAsync()
     }
 }
 
-static async Task DeleteCategoryAsync(int id)
-{
-    using var db = new StoreContext();
-    var category = await db.Categories.FirstOrDefaultAsync(c => c.CategorieId == id);
-    if (category == null)
-    {
-        Console.WriteLine("Category not found!");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-    // Category delete
-    db.Categories.Remove(category);
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Category Deleted!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (Exception exception)
-    {
-        Console.WriteLine(exception.Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task ListCategoriesAsync()
-{
-    using var db = new StoreContext();
-    var categories = await db.Categories.AsNoTracking().ToListAsync();
-    Console.WriteLine("-------------------");
-    Console.WriteLine("Category Id | Category Name");
-    foreach (var category in categories)
-    {
-        Console.WriteLine($"{category.CategorieId} | {category.CategorieName}");
-    }
-    Console.WriteLine("-------------------");
-}
-
-static async Task EditCategoryAsync(int id)
-{
-    using var db = new StoreContext();
-    // Get CategoryId to edit the chosen category
-    var category = await db.Categories.FirstOrDefaultAsync(x => x.CategorieId == id);
-    if (category == null)
-    {
-        Console.WriteLine("Category not found");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-    // Uppdate Name for specefik category
-    Console.WriteLine($"Current Name: {category.CategorieName} (ID: {category.CategorieId}");
-    Console.WriteLine("New Name (leave blank to keep current): ");
-    var name = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (!string.IsNullOrEmpty(name))
-    {
-        if (name.Length > 100)
-        {
-            Console.WriteLine("Name cannot exceed 100 characters.");
-            return;
-        }
-        category.CategorieName = name;
-    }
-    // Uppdate DB:N with our changes
-    try
-    {
-        await db.SaveChangesAsync();
-        Console.WriteLine("Category edited and updated successfully!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException exception)
-    {
-        Console.WriteLine("Error updating category: " + exception.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-}
-
-static async Task AddCategoryAsync()
-{
-    using var db = new StoreContext();
-
-    // Show Category list
-    Console.WriteLine("Current Categories: ");
-    await ListCategoriesAsync();
-
-    Console.WriteLine("Enter Category Name: ");
-    var categoryName = Console.ReadLine()?.Trim() ?? string.Empty;
-    if (string.IsNullOrEmpty(categoryName) || categoryName.Length > 100)
-    {
-        Console.WriteLine("Invalid Category Name (Max 100 characters).");
-        Console.WriteLine("----------------------------");
-        return;
-    }
-   
-    db.Categories.Add(new Categorie { CategorieName = categoryName});
-    try
-    {
-        // Save our changes: Trigger an INSERT + all validation/constraints in the database
-        await db.SaveChangesAsync();
-        Console.WriteLine("Category added!");
-        Console.WriteLine("----------------------------");
-    }
-    catch (DbUpdateException exception)
-    {
-        Console.WriteLine("Error adding category: " + exception.GetBaseException().Message);
-        Console.WriteLine("----------------------------");
-    }
-    Console.WriteLine("Category added successfully!");
-}
