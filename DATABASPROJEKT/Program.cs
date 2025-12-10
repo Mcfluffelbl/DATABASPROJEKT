@@ -18,17 +18,7 @@ using (var db = new StoreContext())
     // Enkel seeding för databasen
     // Kör bara om det inte finns några Customers sen innan
     if (!await db.Customers.AnyAsync())
-    {
-        if (!await db.Categories.AnyAsync())
-        {
-            db.Categories.AddRange(
-                new Categorie { CategorieName = "Skruvar" },
-                new Categorie { CategorieName = "Spikar" }
-                );
-            await db.SaveChangesAsync();
-            Console.WriteLine("Seeded db!");
-        }
-
+    {       
         db.Customers.AddRange(
             new Customer { CustomerId = 1, Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy" },
             new Customer { CustomerId = 2, Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway" }
@@ -42,6 +32,16 @@ using (var db = new StoreContext())
         db.Products.AddRange(
         new Product { ProductId = 1, ProductName = "Skruv 1.2cm", Price = 10, StockQuantity = 1, CategorieName = "Skruvar" },
         new Product { ProductId = 2, ProductName = "Spik 0.2cm", Price = 25, StockQuantity = 23, CategorieName = "Spikar" }
+        );
+        await db.SaveChangesAsync();
+        Console.WriteLine("Seeded db!");
+    }
+
+    if (!await db.Categories.AnyAsync())
+    {
+        db.Categories.AddRange(
+        new Categorie { CategorieName = "Skruvar" },
+        new Categorie { CategorieName = "Spikar" }
         );
         await db.SaveChangesAsync();
         Console.WriteLine("Seeded db!");
