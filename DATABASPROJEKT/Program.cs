@@ -62,12 +62,12 @@ static async Task CustomerAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Customer Management ===");
-        Console.WriteLine("Commands: 1. List Customers | 2. Add Customer | 3. Edit Customer <ID> | 4. Delete Customer <ID> | 5. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Customers | 2. Add Customer | 3. Edit Customer <ID> | 4. Delete Customer <ID> | 5. Sort Customer By Name | 6. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
             continue;
-        if (line.Equals("5", StringComparison.OrdinalIgnoreCase))
+        if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
         {
             await MainMenuAsync();
             break;
@@ -96,6 +96,10 @@ static async Task CustomerAsync()
                     break;
                 }
                 await CustomerHelper.DeleteCustomerAsync(id);
+                break;
+            case "5":
+            case "sortcustomerbyname":
+                await CustomerHelper.SortCustomerAsync();
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");

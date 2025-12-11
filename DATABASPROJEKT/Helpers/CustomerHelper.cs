@@ -169,5 +169,23 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("----------------------------");
             }
         }
+
+        // Sort customers by name
+        public static async Task SortCustomerAsync()
+        {
+            using var db = new StoreContext();
+
+            var customers = await db.Customers.AsNoTracking()
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            Console.WriteLine("-------------------");
+            Console.WriteLine("CustomerId | Name | Email | City ");
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.CustomerId} | {customer.Name} | {customer.Email} | {customer.City}");
+            }
+            Console.WriteLine("-------------------");
+        }
     }
 }
