@@ -30,6 +30,9 @@ namespace DATABASPROJEKT.Migrations
 
                     b.HasKey("CategorieId");
 
+                    b.HasIndex("CategorieName")
+                        .IsUnique();
+
                     b.ToTable("Categories");
                 });
 
@@ -38,6 +41,11 @@ namespace DATABASPROJEKT.Migrations
                     b.Property<int>("CustomerId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -54,7 +62,20 @@ namespace DATABASPROJEKT.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -157,10 +178,6 @@ namespace DATABASPROJEKT.Migrations
                     b.Property<int>("CategorieId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CategorieName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
@@ -175,6 +192,9 @@ namespace DATABASPROJEKT.Migrations
                     b.HasKey("ProductId");
 
                     b.HasIndex("CategorieId");
+
+                    b.HasIndex("ProductName")
+                        .IsUnique();
 
                     b.ToTable("Products");
                 });

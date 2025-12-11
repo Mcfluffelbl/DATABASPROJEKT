@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATABASPROJEKT.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    [Migration("20251207165817_CateryMigration")]
-    partial class CateryMigration
+    [Migration("20251211210727_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace DATABASPROJEKT.Migrations
 
                     b.HasKey("CategorieId");
 
+                    b.HasIndex("CategorieName")
+                        .IsUnique();
+
                     b.ToTable("Categories");
                 });
 
@@ -41,6 +44,11 @@ namespace DATABASPROJEKT.Migrations
                     b.Property<int>("CustomerId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -57,7 +65,20 @@ namespace DATABASPROJEKT.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -66,6 +87,9 @@ namespace DATABASPROJEKT.Migrations
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CategorieId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CustomerId")
@@ -82,6 +106,8 @@ namespace DATABASPROJEKT.Migrations
 
                     b.HasKey("OrderId");
 
+                    b.HasIndex("CategorieId");
+
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Orders");
@@ -91,6 +117,9 @@ namespace DATABASPROJEKT.Migrations
                 {
                     b.Property<int>("OrderRowId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CategorieId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderId")
@@ -109,6 +138,8 @@ namespace DATABASPROJEKT.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("OrderRowId");
+
+                    b.HasIndex("CategorieId");
 
                     b.HasIndex("OrderId");
 
@@ -165,22 +196,36 @@ namespace DATABASPROJEKT.Migrations
 
                     b.HasIndex("CategorieId");
 
+                    b.HasIndex("ProductName")
+                        .IsUnique();
+
                     b.ToTable("Products");
                 });
 
             modelBuilder.Entity("DATABASPROJEKT.Models.Order", b =>
                 {
+                    b.HasOne("DATABASPROJEKT.Models.Categorie", "Categorie")
+                        .WithMany()
+                        .HasForeignKey("CategorieId");
+
                     b.HasOne("DATABASPROJEKT.Models.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Categorie");
+
                     b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("DATABASPROJEKT.Models.OrderRow", b =>
                 {
+                    b.HasOne("DATABASPROJEKT.Models.Categorie", "Categorie")
+                        .WithMany("OrderRows")
+                        .HasForeignKey("CategorieId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DATABASPROJEKT.Models.Order", "Order")
                         .WithMany("OrderRows")
                         .HasForeignKey("OrderId")
@@ -193,6 +238,8 @@ namespace DATABASPROJEKT.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Categorie");
+
                     b.Navigation("Order");
 
                     b.Navigation("Product");
@@ -203,7 +250,7 @@ namespace DATABASPROJEKT.Migrations
                     b.HasOne("DATABASPROJEKT.Models.Categorie", "Categorie")
                         .WithMany("Products")
                         .HasForeignKey("CategorieId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categorie");
@@ -211,6 +258,8 @@ namespace DATABASPROJEKT.Migrations
 
             modelBuilder.Entity("DATABASPROJEKT.Models.Categorie", b =>
                 {
+                    b.Navigation("OrderRows");
+
                     b.Navigation("Products");
                 });
 

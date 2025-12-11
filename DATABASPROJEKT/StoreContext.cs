@@ -22,12 +22,22 @@ namespace DATABASPROJEKT
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var dbPath = Path.Combine(AppContext.BaseDirectory, "shop.db");
-            optionsBuilder.UseSqlite("Data Source = shop.db");
+            optionsBuilder.UseSqlite($"Filename = {dbPath}");
         }
 
         // OnModelCreating is used to configure the models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Categorie>(e =>
+            {
+                e.HasKey(c => c.CategorieId);
+
+                e.Property(c => c.CategorieName).IsRequired().HasMaxLength(100);
+                e.HasIndex(c => c.CategorieName).IsUnique(); // CategorieName must be unique
+
+                // One Categorie can have many Products
+                e.HasMany(c => c.Products).WithOne(c => c.Categorie);
+            });
             // OrderSummary
             modelBuilder.Entity<OrderSummary>(e =>
             {
@@ -45,6 +55,11 @@ namespace DATABASPROJEKT
                 e.Property(c => c.Name).IsRequired().HasMaxLength(100);
                 e.Property(c => c.Email).IsRequired().HasMaxLength(100);
                 e.Property(c => c.City).IsRequired().HasMaxLength(100);
+                e.Property(c => c.Address).IsRequired().HasMaxLength(100);
+                e.Property(c => c.PhoneNumber).IsRequired().HasMaxLength(100);
+                e.Property(c => c.Password).IsRequired().HasMaxLength(100);
+
+                e.HasIndex(c => c.Email).IsUnique(); // Email must be unique
 
                 // One Customer can have many Orders
                 e.HasMany(c => c.Orders);
@@ -60,6 +75,8 @@ namespace DATABASPROJEKT
                 e.Property(p => p.ProductName).IsRequired().HasMaxLength(100);
                 e.Property(p => p.Price).IsRequired();
                 e.Property(p => p.StockQuantity).IsRequired();
+
+                e.HasIndex(p => p.ProductName).IsUnique(); // ProductName must be unique
 
                 // One Product can have many OrderRows
                 e.HasMany(p => p.OrderRows);

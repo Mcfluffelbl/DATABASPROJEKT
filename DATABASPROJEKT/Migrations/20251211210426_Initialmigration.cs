@@ -6,11 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DATABASPROJEKT.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    CategorieId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CategorieName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.CategorieId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
@@ -19,7 +32,10 @@ namespace DATABASPROJEKT.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    City = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
+                    City = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Address = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Password = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,11 +50,18 @@ namespace DATABASPROJEKT.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ProductName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Price = table.Column<decimal>(type: "TEXT", nullable: false),
-                    StockQuantity = table.Column<int>(type: "INTEGER", nullable: false)
+                    StockQuantity = table.Column<int>(type: "INTEGER", nullable: false),
+                    CategorieId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategorieId",
+                        column: x => x.CategorieId,
+                        principalTable: "Categories",
+                        principalColumn: "CategorieId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,11 +73,17 @@ namespace DATABASPROJEKT.Migrations
                     CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false)
+                    TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    CategorieId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.OrderId);
+                    table.ForeignKey(
+                        name: "FK_Orders_Categories_CategorieId",
+                        column: x => x.CategorieId,
+                        principalTable: "Categories",
+                        principalColumn: "CategorieId");
                     table.ForeignKey(
                         name: "FK_Orders_Customers_CustomerId",
                         column: x => x.CustomerId,
@@ -72,12 +101,19 @@ namespace DATABASPROJEKT.Migrations
                     OrderId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: true),
+                    CategorieId = table.Column<int>(type: "INTEGER", nullable: true),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderRows", x => x.OrderRowId);
+                    table.ForeignKey(
+                        name: "FK_OrderRows_Categories_CategorieId",
+                        column: x => x.CategorieId,
+                        principalTable: "Categories",
+                        principalColumn: "CategorieId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderRows_Orders_OrderId",
                         column: x => x.OrderId,
@@ -93,6 +129,23 @@ namespace DATABASPROJEKT.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Categories_CategorieName",
+                table: "Categories",
+                column: "CategorieName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Customers_Email",
+                table: "Customers",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderRows_CategorieId",
+                table: "OrderRows",
+                column: "CategorieId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderRows_OrderId",
                 table: "OrderRows",
                 column: "OrderId");
@@ -103,9 +156,25 @@ namespace DATABASPROJEKT.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_CategorieId",
+                table: "Orders",
+                column: "CategorieId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerId",
                 table: "Orders",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategorieId",
+                table: "Products",
+                column: "CategorieId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_ProductName",
+                table: "Products",
+                column: "ProductName",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -122,6 +191,9 @@ namespace DATABASPROJEKT.Migrations
 
             migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

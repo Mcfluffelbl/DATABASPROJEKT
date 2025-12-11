@@ -18,12 +18,69 @@ namespace DATABASPROJEKT.Helpers
             // AsTracking = faster for read-only scenation. (No change tracking)
             var rows = await db.Customers.AsNoTracking().OrderBy(customers => customers.CustomerId).ToListAsync();
             Console.WriteLine("-------------------");
-            Console.WriteLine("CustomerId | Name | Email | City ");
+            Console.WriteLine("CustomerId | Name | Email | City | Address | PhoneNumber ");
             foreach (var row in rows)
             {
-                Console.WriteLine($"{row.CustomerId} | {row.Name} | {row.Email} | {row.City}");
+                Console.WriteLine($"{row.CustomerId} | {row.Name} | {row.Email} | {row.City} | row.Address | row.PhoneNumber ");
             }
+            Console.WriteLine("-------------------");         
+        }
+
+        public static async Task ShowCustomerDetailAsync()
+        {
+            // New for encryption
+            using var db = new StoreContext();
+
+            var customers = await db.Customers.AsNoTracking()
+                                              .OrderBy(x => x.CustomerId)
+                                              .ToListAsync();
+
             Console.WriteLine("-------------------");
+            if (!await db.Customers.AnyAsync())
+            {
+                Console.WriteLine("No customers found.");
+                return;
+            }
+            Console.WriteLine("CustomerId | Name | Email (Encrypted) | City (Encrypted) | Address (Encrypted) | PhoneNumber (Encrypted) ");
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.CustomerId} | {customer.Name} | {customer.Email} | {customer.City} | {customer.Address} | {customer.PhoneNumber} ");
+            }
+
+            Console.WriteLine("-------------------");
+            Console.WriteLine("Would you like to see decrypted data? (y/n)");
+            var input = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (input == "y")
+            {
+                Console.WriteLine("-------------------");
+                Console.WriteLine("Please choose customer id");
+                if (!int.TryParse(Console.ReadLine(), out int cId))
+                {
+                    Console.WriteLine("Invalid customer id.");
+                    return;
+                }
+
+                var customerToView = await db.Customers.FirstAsync(c => c.CustomerId == cId);
+                var customerInfo = await db.Customers.AsNoTracking().Where(c => c.CustomerId == cId).ToListAsync();
+
+                Console.WriteLine("-------------------");
+                Console.WriteLine("Please enter password to view sensetive info");
+                var passwordInput = Console.ReadLine()?.Trim() ?? string.Empty;
+                if (passwordInput != EncryptionHelper.Decrypt(customerToView.Password))
+                {
+                    Console.WriteLine("Invalid password");
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("-------------------");
+                    Console.WriteLine("CustomerId | Name | Email (Decrypted) | City (Decrypted) | Address (Decrypted) | PhoneNumber (Decrypted) ");
+                    foreach (var customer in customerInfo)
+                    {
+                        Console.WriteLine($"{customer.CustomerId} | {customer.Name} | {EncryptionHelper.Decrypt(customer.Email)} | {EncryptionHelper.Decrypt(customer.City)} | {EncryptionHelper.Decrypt(customer.Address)} | {EncryptionHelper.Decrypt(customer.PhoneNumber)} ");
+                    }
+                }
+            }
         }
 
         // Add new customer
@@ -56,8 +113,35 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
+            //Console.WriteLine("Enter customer address: ");
+            //var address = Console.ReadLine()?.Trim() ?? string.Empty;
+            //if (string.IsNullOrEmpty(address) || address.Length > 100)
+            //{
+            //    Console.WriteLine("Address is required (Max 100)");
+            //    Console.WriteLine("----------------------------");
+            //    return;
+            //}
+
+            //Console.WriteLine("Enter customer phone number: ");
+            //var phoneNumber = Console.ReadLine()?.Trim() ?? string.Empty;
+            //if (string.IsNullOrEmpty(phoneNumber) || phoneNumber.Length > 100)
+            //{
+            //    Console.WriteLine("Phone Number is required (Max 100)");
+            //    Console.WriteLine("----------------------------");
+            //    return;
+            //}
+
+            //Console.WriteLine("Enter customer password: ");
+            //var password = Console.ReadLine()?.Trim() ?? string.Empty;
+            //if (string.IsNullOrEmpty(password) || password.Length > 100)
+            //{
+            //    Console.WriteLine("Password is required (Max 100)");
+            //    Console.WriteLine("----------------------------");
+            //    return;
+            //}
+
             using var db = new StoreContext();
-            db.Customers.Add(new Customer { Name = name, Email = email, City = city });
+            db.Customers.Add(new Customer { Name = name, Email = email, City = city }); //, Address = address, PhoneNumber = phoneNumber, Password = password });
             try
             {
                 // Save changes

@@ -5,8 +5,13 @@ using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
 using DATABASPROJEKT.Helpers;
 
+// Show path to the database file
+Console.WriteLine("DB: " + Path.Combine(AppContext.BaseDirectory, "shop.db"));
+
 // Intro 
 Console.WriteLine("Welcome To Youre ShoppingApp!");
+
+await Seeding.SeedAsync();
 
 // Call upon Main Menu
 await MainMenuAsync();

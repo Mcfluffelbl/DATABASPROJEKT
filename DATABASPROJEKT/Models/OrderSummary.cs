@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATABASPROJEKT.Models
 {
+    [Keyless]
     public class OrderSummary
     {
         public int OrderId { get; set; }

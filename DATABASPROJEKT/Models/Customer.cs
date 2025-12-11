@@ -19,6 +19,12 @@ namespace DATABASPROJEKT.Models
         public string Email { get; set; } = null!;
         [Required, MaxLength(100)]
         public string City { get; set; } = null!;
+        [Required, MaxLength(100)]
+        public string Address { get; set; } = null!;
+        [Required, MaxLength(100)]
+        public string PhoneNumber { get; set; } = null!;
+        [Required, MaxLength(100)]
+        public string Password { get; set; } = null!;
 
         // One Customer can have many Orders
         public List<Order> Orders { get; set; } = new();

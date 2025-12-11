@@ -27,19 +27,8 @@ public static class Seeding
             if (!await db.Customers.AnyAsync())
             {
                 db.Customers.AddRange(
-                    new Customer { CustomerId = 1, Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy" },
-                    new Customer { CustomerId = 2, Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway" }
-                );
-                await db.SaveChangesAsync();
-                Console.WriteLine("Seeded db!");
-            }
-
-            // Only if there were no products since before
-            if (!await db.Products.AnyAsync())
-            {
-                db.Products.AddRange(
-                new Product { ProductId = 1, ProductName = "Skruv 1.2cm", Price = 10, StockQuantity = 1, CategorieName = "Skruvar" },
-                new Product { ProductId = 2, ProductName = "Spik 0.2cm", Price = 25, StockQuantity = 23, CategorieName = "Spikar" }
+                    new Customer { Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy", Address = EncryptionHelper.Encrypt("Trojaholm 3"), PhoneNumber = EncryptionHelper.Encrypt("0704534576"), Password = EncryptionHelper.Encrypt("1234") }, // + Email, Address = EncryptionHelper.Encrypt("Trojaholm 3"), PhoneNumber = EncryptionHelper.Encrypt("0704534576"), Password = EncryptionHelper.Encrypt("1234")
+                    new Customer { Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway", Address = EncryptionHelper.Encrypt("Riddarholmen 7"), PhoneNumber = EncryptionHelper.Encrypt("0793452344"), Password = EncryptionHelper.Encrypt("4321") } // + Email, Address = EncryptionHelper.Encrypt("Riddarholmen 7"), PhoneNumber = EncryptionHelper.Encrypt("0793452344"), Password = EncryptionHelper.Encrypt("4321")
                 );
                 await db.SaveChangesAsync();
                 Console.WriteLine("Seeded db!");
@@ -56,17 +45,20 @@ public static class Seeding
                 Console.WriteLine("Seeded db!");
             }
 
-            // An easy seeding for the database
-            // Only if there are no orders already
-            if (!await db.Orders.AnyAsync())
+            // Only if there were no products since before
+            if (!await db.Products.AnyAsync())
             {
-                db.Orders.AddRange(
-                new Order { OrderId = 1, OrderDate = DateTime.Today.AddDays(-3), CustomerId = 1, Status = Status.Paid, TotalAmount = 10000 },
-                new Order { OrderId = 2, OrderDate = DateTime.Today.AddDays(-10), CustomerId = 2, Status = Status.Pending, TotalAmount = 200 }
+                var spik = await db.Categories.FirstAsync(c => c.CategorieName == "Spikar");
+                var skruv = await db.Categories.FirstAsync(c => c.CategorieName == "Skruvar");
+                db.Products.AddRange(
+                new Product { ProductName = "Skruv 1.2cm", Price = 10, StockQuantity = 1, CategorieId = skruv.CategorieId },
+                new Product { ProductName = "Spik 0.2cm", Price = 25, StockQuantity = 23, CategorieId = spik.CategorieId}
                 );
                 await db.SaveChangesAsync();
                 Console.WriteLine("Seeded db!");
             }
+
+           
         }
     }
 }
