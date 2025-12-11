@@ -115,7 +115,7 @@ namespace DATABASPROJEKT.Helpers
             }
 
             // Uppdate Name for specefik product
-            Console.WriteLine($"Current Name: {product.ProductName} (ID: {product.ProductId}");
+            Console.WriteLine($"Current Name: {product.ProductName}");
             Console.WriteLine("New Name (leave blank to keep current): ");
             var name = Console.ReadLine()?.Trim() ?? string.Empty;
             if (!string.IsNullOrEmpty(name))
@@ -128,6 +128,63 @@ namespace DATABASPROJEKT.Helpers
                 }
                 product.ProductName = name;
             }
+
+            // Uppdate Price for specefik product
+            Console.WriteLine($"Current Price: {product.Price}");
+            Console.WriteLine("New Price (leave blank to keep current): ");
+            var priceInput = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(priceInput))
+            {
+                if (decimal.TryParse(priceInput, out var newPrice))
+                {
+                    product.Price = newPrice;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid price input.");
+                    Console.WriteLine("----------------------------");
+                    return;
+                }
+            }
+
+            // Uppdate StockQuantity for specefik product
+            Console.WriteLine($"Current Stock Quantity: {product.StockQuantity}");
+            Console.WriteLine("New Stock Quantity (leave blank to keep current): ");
+            var quantityInput = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(quantityInput))
+            {
+                if (int.TryParse(quantityInput, out var newQuantity))
+                {
+                    product.StockQuantity = newQuantity;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid stock quantity input.");
+                    Console.WriteLine("----------------------------");
+                    return;
+                }
+            }
+
+            // Uppdate CategoryId for specefik product
+            Console.WriteLine($"Current Category ID: {product.CategorieId}");
+            Console.WriteLine("Current Categories: ");
+            await CategoryHelper.ListCategoriesAsync();
+            Console.WriteLine("New Category ID (leave blank to keep current): ");
+            var categoryInput = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(categoryInput))
+            {
+                if (int.TryParse(categoryInput, out var newCategoryId))
+                {
+                    product.CategorieId = newCategoryId;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid category ID input.");
+                    Console.WriteLine("----------------------------");
+                    return;
+                }
+            }
+
             // Uppdate DB:N with our changes
             try
             {
@@ -191,6 +248,24 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("Error deleting product: " + ex.GetBaseException().Message);
                 Console.WriteLine("----------------------------");
             }
+        }
+
+        // Sort products by category
+        public static async Task SortByCategoryAsync()
+        {
+            using var db = new StoreContext();
+            var products = await db.Products
+                .AsNoTracking()
+                .Include(p => p.Categorie)
+                .OrderBy(p => p.Categorie.CategorieName)
+                .ToListAsync();
+            Console.WriteLine("-------------------");
+            Console.WriteLine("Product Id | Product Name | Category Name");
+            foreach (var product in products)
+            {
+                Console.WriteLine($"{product.ProductId} | {product.ProductName} | {product.Categorie?.CategorieName}");
+            }
+            Console.WriteLine("-------------------");
         }
     }
 }
