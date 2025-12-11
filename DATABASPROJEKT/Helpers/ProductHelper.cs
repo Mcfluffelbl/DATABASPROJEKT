@@ -101,6 +101,7 @@ namespace DATABASPROJEKT.Helpers
         public static async Task EditProductAsync(int idD)
         {
             using var db = new StoreContext();
+
             // Get ProductId to edit the chosen product
             var product = await db.Products.FirstOrDefaultAsync(x => x.ProductId == idD);
             if (product == null)
@@ -109,6 +110,7 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("----------------------------");
                 return;
             }
+
             // Uppdate Name for specefik product
             Console.WriteLine($"Current Name: {product.ProductName} (ID: {product.ProductId}");
             Console.WriteLine("New Name (leave blank to keep current): ");

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using DATABASPROJEKT.Enum;
 using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
@@ -64,14 +65,6 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
-            // Lägg till så att det finns : Sortering och filtrering: o ordersbystatus<status> → filtrera orders på t.ex. "Pending", "Paid", "Shipped" o ordersbycustomer<customerId> → visa alla orders för en viss kund
-
-
-            // Paginering:
-            // o orderspage<page> < pageSize > → lista orders sida för sida med Skip och
-            // Take, sorterade t.ex.på OrderDate.
-
-
             Console.WriteLine("-------------------");
             Console.WriteLine($"Order ID: {order.OrderId}");
             Console.WriteLine($"Order Date: {order.OrderDate.ToShortDateString()}");
@@ -80,6 +73,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine($"Total Amount: {order.TotalAmount:C}");
             Console.WriteLine($"Category: {order.Categorie}");
             Console.WriteLine("Order lines:");
+
             if (order.OrderRows != null && order.OrderRows.Any())
             {
                 foreach (var row in order.OrderRows)
@@ -123,21 +117,21 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
-            //Console.WriteLine("Choose Order Status:");
-            //foreach (var value in Enum.GetValues(typeof(Status)))
-            //{
-            //    Console.WriteLine($"{(int)value}. {value}");
-            //}
+            Console.WriteLine("Choose Order Status:");
+            foreach (var value in System.Enum.GetValues(typeof(Status)))
+            {
+                Console.WriteLine($"{(int)value}. {value}");
+            }
 
-            //Console.Write("> ");
+            Console.Write("> ");
 
-            //if (!int.TryParse(Console.ReadLine(), out var input) ||
-            //    !Enum.IsDefined(typeof(Status), input))
-            //{
-            //    Console.WriteLine("Invalid status selection.");
-            //    Console.WriteLine("----------------------------");
-            //    return;
-            //}
+            if (!int.TryParse(Console.ReadLine(), out var input) ||
+                System.Enum.IsDefined(typeof(Status), input))
+            {
+                Console.WriteLine("Invalid status selection.");
+                Console.WriteLine("----------------------------");
+                return;
+            }
 
             Status choice = (Status)input;
 
@@ -187,7 +181,7 @@ namespace DATABASPROJEKT.Helpers
                 {
                     ProductId = product.ProductId,
                     Quantity = quantity,
-                    //Status = choice,
+                    Status = choice,
                     UnitPrice = product.Price
                 });
 
@@ -270,7 +264,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
-        // Lista orders sida för sida med Skip och Take, sorterade t.ex.på OrderDate. + ADD I CASE!!!!
+        // List orders page by page with Skip and Take, sorted by e.g. OrderDate
         public static async Task OrdersPageAsync(int page, int pageSize)
         {
             using var db = new StoreContext();
@@ -316,6 +310,7 @@ namespace DATABASPROJEKT.Helpers
         {
             Console.WriteLine("Current Order Summaries: ");
             await ListOrderSummary();
+
             Console.WriteLine("Enter Order ID to view summary details: ");
             if (!int.TryParse(Console.ReadLine(), out var orderId))
             {
@@ -323,14 +318,17 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("----------------------------");
                 return;
             }
+
             using var db = new StoreContext();
             var summary = await db.OrderSummaries.FirstOrDefaultAsync(o => o.OrderId == orderId);
+
             if (summary == null)
             {
                 Console.WriteLine("Order summary not found.");
                 Console.WriteLine("----------------------------");
                 return;
             }
+
             Console.WriteLine("-------------------");
             Console.WriteLine($"Order ID: {summary.OrderId}");
             Console.WriteLine($"Order Date: {summary.OrderDate.ToShortDateString()}");
@@ -343,17 +341,21 @@ namespace DATABASPROJEKT.Helpers
         public static async Task DeleteOrderAsync(int orderId)
         {
             using var db = new StoreContext();
+
             var order = await db.Orders
                 .Include(o => o.OrderRows)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
             if (order == null)
             {
                 Console.WriteLine("Order not found.");
                 Console.WriteLine("----------------------------");
                 return;
             }
+
             db.OrderRows.RemoveRange(order.OrderRows);
             db.Orders.Remove(order);
+
             try
             {
                 await db.SaveChangesAsync();
@@ -367,35 +369,11 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
-        // Update order status
-        public static async Task UpdateOrderStatusAsync(int orderId, Status newStatus)
-        {
-            using var db = new StoreContext();
-            var order = await db.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-            if (order == null)
-            {
-                Console.WriteLine("Order not found.");
-                Console.WriteLine("----------------------------");
-                return;
-            }
-            order.Status = newStatus;
-            try
-            {
-                await db.SaveChangesAsync();
-                Console.WriteLine("Order status updated successfully!");
-                Console.WriteLine("----------------------------");
-            }
-            catch (DbUpdateException ex)
-            {
-                Console.WriteLine("DB ERROR: " + ex.GetBaseException().Message);
-                Console.WriteLine("----------------------------");
-            }
-        }
-
         // Show all orders with their details
         public static async Task ShowOrdersWithDetailsAsync()
         {
             using var db = new StoreContext();
+
             var orders = await db.Orders
                 .AsNoTracking()
                 .Include(o => o.Customer)
@@ -403,11 +381,12 @@ namespace DATABASPROJEKT.Helpers
                     .ThenInclude(or => or.Product)
                 .OrderBy(o => o.OrderId)
                 .ToListAsync();
-            Console.WriteLine("-------------------");
+       
             foreach (var order in orders)
             {
                 Console.WriteLine($"Order ID: {order.OrderId} | Customer: {order.Customer?.Name} | Date: {order.OrderDate.ToShortDateString()} | Status: {order.Status} | Total: {order.TotalAmount:C}");
                 Console.WriteLine(" Order Lines:");
+
                 foreach (var row in order.OrderRows)
                 {
                     var productName = row.Product?.ProductName ?? $"ProductId:{row.ProductId}";
@@ -421,6 +400,9 @@ namespace DATABASPROJEKT.Helpers
         public static async Task<int> GetTotalOrderCountAsync()
         {
             using var db = new StoreContext();
+
+            Console.WriteLine("Calculating total number of orders...");
+            Console.WriteLine($"Total Orders: {await db.Orders.CountAsync()}");
             return await db.Orders.CountAsync();
         }
 
@@ -428,6 +410,7 @@ namespace DATABASPROJEKT.Helpers
         public static async Task EditOrderAsync(int idD)
         {
             using var db = new StoreContext();
+
             // Get OrderId to edit the chosen order
             var order = await db.Orders.FirstOrDefaultAsync(x => x.OrderId == idD);
             if (order == null)
@@ -436,7 +419,45 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("----------------------------");
                 return;
             }
-            // Implement editing logic here
+
+            // Update Order Date
+            Console.WriteLine($"Current Date: {order.OrderDate}");          
+            Console.WriteLine("Enter new Order Date (yyyy-MM-dd), (leave blank to keep current): ");
+            var dateInput = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(dateInput))
+            {
+                if (DateTime.TryParse(dateInput, out var newDate))
+                {
+                    order.OrderDate = newDate;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid date format. Keeping current date.");
+                }
+            }
+
+            // Update Status
+            Console.WriteLine($"Current Status: {order.Status}");
+            Console.WriteLine("Choose a new Order Status:");
+            foreach (var value in System.Enum.GetValues(typeof(Status)))
+            {
+                Console.WriteLine($"{(int)value}. {value}");
+            }
+            Console.Write("> ");
+            var statusInput = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(statusInput))
+            {
+                if (int.TryParse(statusInput, out var statusInt) && System.Enum.IsDefined(typeof(Status), statusInt))
+                {
+                    order.Status = (Status)statusInt;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid status selection. Keeping current status.");
+                }
+            }
+
+            // Update DB with our changes
             order.OrderId = idD;
             try
             {

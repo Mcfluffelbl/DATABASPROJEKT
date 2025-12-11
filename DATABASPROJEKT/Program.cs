@@ -109,12 +109,12 @@ static async Task OrdersAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Order Management ===");
-        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 5. Show Order Details <ID> | 6. Sort Orders By CustomerID | 7. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 5. Show Order Details <ID> | 6. Sort Orders By CustomerID | 7. Total Order Count | 8. Sort By Status | 9. Orders Pages | 10. Show Orders With Details | 11. Show Order Summary Details | 12. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
             continue;
-        if (line.Equals("7", StringComparison.OrdinalIgnoreCase))
+        if (line.Equals("12", StringComparison.OrdinalIgnoreCase))
         {
             await MainMenuAsync();
             break;
@@ -161,6 +161,45 @@ static async Task OrdersAsync()
             case "6":
             case "sortordersbycustomerid":
                 await OrderHelper.OrdersByCustomerAsync();
+                break;
+            case "7":
+                case "totalordercount":
+                await OrderHelper.GetTotalOrderCountAsync();
+                break;
+            case "8":
+            case "ordersbystatus":
+                Console.WriteLine("Enter order status: ( Pending | Paid | Shipped ) ");
+                var statusInput = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(statusInput))
+                {
+                    Console.WriteLine("Uknown status...");
+                    break;
+                }
+                if (Enum.TryParse<Status>(statusInput, true, out var status))
+                {
+                    await OrderHelper.OrdersByStatusAsync(status);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid status. Valid values: " + string.Join(", ", Enum.GetNames(typeof(Status))));
+                }
+                break;
+            case "9":
+            case "orderspages":
+                if (parts.Length < 3 || !int.TryParse(parts[1], out var page) || !int.TryParse(parts[2], out var pageSize))
+                {
+                    Console.WriteLine("Usage: orderspages <page> <pageSize>");
+                    break;
+                }
+                await OrderHelper.OrdersPageAsync(page, pageSize);
+                break;
+            case "10":
+            case "showorderswithdetails":
+                await OrderHelper.ShowOrdersWithDetailsAsync();
+                break;
+            case "11":
+            case "showordersummarydetails":
+                await OrderHelper.ShowOrderSummaryDetailsAsync();
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");
