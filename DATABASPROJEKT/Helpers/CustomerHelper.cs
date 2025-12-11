@@ -21,7 +21,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine("CustomerId | Name | Email | City | Address | PhoneNumber ");
             foreach (var row in rows)
             {
-                Console.WriteLine($"{row.CustomerId} | {row.Name} | {row.Email} | {row.City} | row.Address | row.PhoneNumber ");
+                Console.WriteLine($"{row.CustomerId} | {row.Name} | {row.Email} | {row.City} | {row.Address} | {row.PhoneNumber} ");
             }
             Console.WriteLine("-------------------");         
         }
@@ -113,35 +113,35 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
-            //Console.WriteLine("Enter customer address: ");
-            //var address = Console.ReadLine()?.Trim() ?? string.Empty;
-            //if (string.IsNullOrEmpty(address) || address.Length > 100)
-            //{
-            //    Console.WriteLine("Address is required (Max 100)");
-            //    Console.WriteLine("----------------------------");
-            //    return;
-            //}
+            Console.WriteLine("Enter customer address: ");
+            var address = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(address) || address.Length > 100)
+            {
+                Console.WriteLine("Address is required (Max 100)");
+                Console.WriteLine("----------------------------");
+                return;
+            }
 
-            //Console.WriteLine("Enter customer phone number: ");
-            //var phoneNumber = Console.ReadLine()?.Trim() ?? string.Empty;
-            //if (string.IsNullOrEmpty(phoneNumber) || phoneNumber.Length > 100)
-            //{
-            //    Console.WriteLine("Phone Number is required (Max 100)");
-            //    Console.WriteLine("----------------------------");
-            //    return;
-            //}
+            Console.WriteLine("Enter customer phone number: ");
+            var phoneNumber = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(phoneNumber) || phoneNumber.Length > 100)
+            {
+                Console.WriteLine("Phone Number is required (Max 100)");
+                Console.WriteLine("----------------------------");
+                return;
+            }
 
-            //Console.WriteLine("Enter customer password: ");
-            //var password = Console.ReadLine()?.Trim() ?? string.Empty;
-            //if (string.IsNullOrEmpty(password) || password.Length > 100)
-            //{
-            //    Console.WriteLine("Password is required (Max 100)");
-            //    Console.WriteLine("----------------------------");
-            //    return;
-            //}
+            Console.WriteLine("Enter customer password: ");
+            var password = Console.ReadLine()?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(password) || password.Length > 100)
+            {
+                Console.WriteLine("Password is required (Max 100)");
+                Console.WriteLine("----------------------------");
+                return;
+            }
 
             using var db = new StoreContext();
-            db.Customers.Add(new Customer { Name = name, Email = email, City = city }); //, Address = address, PhoneNumber = phoneNumber, Password = password });
+            db.Customers.Add(new Customer { Name = name, Email = email, City = city, Address = address, PhoneNumber = phoneNumber, Password = password }); 
             try
             {
                 // Save changes

@@ -27,8 +27,8 @@ public static class Seeding
             if (!await db.Customers.AnyAsync())
             {
                 db.Customers.AddRange(
-                    new Customer { Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy", Address = EncryptionHelper.Encrypt("Trojaholm 3"), PhoneNumber = EncryptionHelper.Encrypt("0704534576"), Password = EncryptionHelper.Encrypt("1234") }, // + Email, Address = EncryptionHelper.Encrypt("Trojaholm 3"), PhoneNumber = EncryptionHelper.Encrypt("0704534576"), Password = EncryptionHelper.Encrypt("1234")
-                    new Customer { Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway", Address = EncryptionHelper.Encrypt("Riddarholmen 7"), PhoneNumber = EncryptionHelper.Encrypt("0793452344"), Password = EncryptionHelper.Encrypt("4321") } // + Email, Address = EncryptionHelper.Encrypt("Riddarholmen 7"), PhoneNumber = EncryptionHelper.Encrypt("0793452344"), Password = EncryptionHelper.Encrypt("4321")
+                    new Customer { Name = "DaVinci", Email = "DaVinci@Code.com", City = "Italy", Address = EncryptionHelper.Encrypt("Trojaholm 3"), PhoneNumber = EncryptionHelper.Encrypt("0704534576"), Password = EncryptionHelper.Encrypt("1234") }, 
+                    new Customer { Name = "Sten", Email = "Sten.Bergman@Telia.com", City = "Norway", Address = EncryptionHelper.Encrypt("Riddarholmen 7"), PhoneNumber = EncryptionHelper.Encrypt("0793452344"), Password = EncryptionHelper.Encrypt("4321") } 
                 );
                 await db.SaveChangesAsync();
                 Console.WriteLine("Seeded db!");
