@@ -23,10 +23,12 @@ namespace DATABASPROJEKT.Models
 
         // One order can have many rows
         public List<OrderRow> OrderRows { get; set; } = new();
+
         // Foreign Key to Categorie
         [ForeignKey(nameof(CategorieId))]
         public int CategorieId { get; set; }
         public string CategorieName { get; set; } = string.Empty;
+
         // Navigation property
         [ForeignKey("CategorieId")]
         public Categorie? Categorie { get; set; }

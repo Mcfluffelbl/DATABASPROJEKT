@@ -60,7 +60,7 @@ namespace DATABASPROJEKT.Helpers
             db.Customers.Add(new Customer { Name = name, Email = email, City = city });
             try
             {
-                // Save our changes: Trigger an INSERT + all validation/constraints in the database
+                // Save changes
                 await db.SaveChangesAsync();
                 Console.WriteLine("Customer added!");
                 Console.WriteLine("----------------------------");

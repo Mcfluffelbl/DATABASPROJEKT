@@ -125,8 +125,7 @@ namespace DATABASPROJEKT.Helpers
 
             Console.Write("> ");
 
-            if (!int.TryParse(Console.ReadLine(), out var input) ||
-                System.Enum.IsDefined(typeof(Status), input))
+            if (!int.TryParse(Console.ReadLine(), out var input) || System.Enum.IsDefined(typeof(Status), input))
             {
                 Console.WriteLine("Invalid status selection.");
                 Console.WriteLine("----------------------------");
@@ -139,6 +138,7 @@ namespace DATABASPROJEKT.Helpers
             var orderRows = new List<OrderRow>();
             while (true)
             {
+                // Show existing products to choose from
                 Console.WriteLine("Current Products: ");
                 await ProductHelper.ShowProductsAsync();
 
@@ -397,6 +397,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Get total count of orders
         public static async Task<int> GetTotalOrderCountAsync()
         {
             using var db = new StoreContext();

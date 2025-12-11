@@ -36,6 +36,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // List all categories
         public static async Task ListCategoriesAsync()
         {
             using var db = new StoreContext();
@@ -49,6 +50,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine("-------------------");
         }
 
+        // Edit existing category
         public static async Task EditCategoryAsync(int idD)
         {
             using var db = new StoreContext();
@@ -87,6 +89,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Add new category
         public static async Task AddCategoryAsync()
         {
             using var db = new StoreContext();

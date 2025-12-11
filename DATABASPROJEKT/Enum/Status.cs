@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DATABASPROJEKT.Enum
 {
+    // Enum for order status
     public enum Status
     {
         Pending,

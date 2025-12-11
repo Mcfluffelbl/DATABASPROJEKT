@@ -5,8 +5,10 @@ using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
 using DATABASPROJEKT.Helpers;
 
+// Intro 
 Console.WriteLine("Welcome To Youre ShoppingApp!");
 
+// Call upon Main Menu
 await MainMenuAsync();
 
 // Main Menu

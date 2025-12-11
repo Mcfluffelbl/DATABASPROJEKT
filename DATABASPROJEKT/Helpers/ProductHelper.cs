@@ -28,6 +28,7 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
+            // Let user input data for new product price
             Console.WriteLine("Enter Product Price: ");
             if (!decimal.TryParse(Console.ReadLine(), out var productprice))
             {
@@ -36,6 +37,7 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
+            // Let user input data for new product quantity
             Console.WriteLine("Enter Product Quantity: ");
             if (!int.TryParse(Console.ReadLine(), out var productquantity))
             {
@@ -44,9 +46,9 @@ namespace DATABASPROJEKT.Helpers
                 return;
             }
 
+            // Show Category list
             Console.WriteLine("Current Categories: ");
-            // Visa kategorier
-
+            // Let user input data for new product category
             Console.WriteLine("Enter Product Category: ");
             if (!int.TryParse(Console.ReadLine(), out var categorieId))
             {
@@ -68,6 +70,7 @@ namespace DATABASPROJEKT.Helpers
 
             try
             {
+                // Save changes
                 await db.SaveChangesAsync();
                 Console.WriteLine("Product added successfully!");
                 Console.WriteLine("----------------------------");
@@ -143,10 +146,12 @@ namespace DATABASPROJEKT.Helpers
         public static async Task ShowProductDetailsAsync(int productId)
         {
             using var db = new StoreContext();
+
             var product = await db.Products
                 .AsNoTracking()
                 .Include(c => c.Categorie)
                 .FirstOrDefaultAsync(p => p.ProductId == productId);
+
             if (product == null)
             {
                 Console.WriteLine("Product not found.");
@@ -165,7 +170,9 @@ namespace DATABASPROJEKT.Helpers
         public static async Task DeleteProductAsync(int productId)
         {
             using var db = new StoreContext();
+
             var product = await db.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
+
             if (product == null)
             {
                 Console.WriteLine("Product not found.");
