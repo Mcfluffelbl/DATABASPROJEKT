@@ -10,6 +10,7 @@ namespace DATABASPROJEKT.Helpers
 {
     public static class CategoryHelper
     {
+        // Delete Category by Id
         public static async Task DeleteCategoryAsync(int id)
         {
             using var db = new StoreContext();

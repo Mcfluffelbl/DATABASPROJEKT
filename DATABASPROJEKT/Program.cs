@@ -109,12 +109,12 @@ static async Task OrdersAsync()
     {
         Console.WriteLine("\n=============================");
         Console.WriteLine("\n=== Order Management ===");
-        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 5. Show Order Details <ID> | 6. Back to Main Menu");
+        Console.WriteLine("Commands: 1. List Orders | 2. Add Order | 3. Edit Order <ID> | 4. Delete Order <ID> | 5. Show Order Details <ID> | 6. Sort Orders By CustomerID | 7. Back to Main Menu");
         Console.WriteLine("Enter your choice: ");
         var line = Console.ReadLine()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(line))
             continue;
-        if (line.Equals("6", StringComparison.OrdinalIgnoreCase))
+        if (line.Equals("7", StringComparison.OrdinalIgnoreCase))
         {
             await MainMenuAsync();
             break;
@@ -157,6 +157,10 @@ static async Task OrdersAsync()
                     break;
                 }
                 await OrderHelper.ShowOrderDetailsAsync(DiD);
+                break;
+            case "6":
+            case "sortordersbycustomerid":
+                await OrderHelper.OrdersByCustomerAsync();
                 break;
             default:
                 Console.WriteLine("Unknown command. Please try again.");

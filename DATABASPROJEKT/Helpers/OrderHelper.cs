@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DATABASPROJEKT.Enum;
 using DATABASPROJEKT.Models;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DATABASPROJEKT.Helpers
 {
@@ -138,7 +139,7 @@ namespace DATABASPROJEKT.Helpers
             //    return;
             //}
 
-            //Status choice = (Status)input;
+            Status choice = (Status)input;
 
             // Add Products to order
             var orderRows = new List<OrderRow>();
@@ -210,7 +211,7 @@ namespace DATABASPROJEKT.Helpers
             {
                 CustomerId = customerId,
                 OrderDate = orderDate,
-                //Status = choice,
+                Status = choice,
                 TotalAmount = totalAmount,
                 OrderRows = orderRows
             };
@@ -230,22 +231,43 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
-        // Filtrera orders på t.ex. "Pending", "Paid", "Shipped"
-        public static async Task OrdersByStatusAsync()
+        // Filter by Status
+        public static async Task OrdersByStatusAsync(Status status)
         {
             using var db = new StoreContext();
+         
+            var orderByStatus = db.Orders
+                .Include(c => c.Customer)
+                .AsNoTracking()
+                .Where(o => o.Status == status)
+                .OrderBy(o => o.OrderDate);
 
-            // Filtrera orders på t.ex. "Pending", "Paid", "Shipped"
+            var Orders = await orderByStatus
+                            .ToListAsync();
 
+            foreach (var order in Orders)
+                {
+                Console.WriteLine($"{order.OrderId} - {order.CustomerId} - {order.OrderDate} | {order.Customer?.Name} | {order.Status}");
+            }
         }
 
-        // Visa alla orders för en viss kund
+        // Sort by Customer ID
         public static async Task OrdersByCustomerAsync()
         {
             using var db = new StoreContext();
 
-            // Visa alla orders för en viss kund
-            Console.WriteLine("");
+            var orderBy = db.Orders
+                .Include(c => c.Customer)
+                .AsNoTracking()
+                .OrderBy(c => c.CustomerId);
+
+            var Customer = await orderBy
+                            .ToListAsync();
+
+            foreach (var customerOrder in Customer)
+            {
+                Console.WriteLine($"{customerOrder.OrderId} - {customerOrder.CustomerId} - {customerOrder.OrderDate} | {customerOrder.Customer?.Name}");
+            }
         }
 
         // Lista orders sida för sida med Skip och Take, sorterade t.ex.på OrderDate. + ADD I CASE!!!!
@@ -345,6 +367,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Update order status
         public static async Task UpdateOrderStatusAsync(int orderId, Status newStatus)
         {
             using var db = new StoreContext();
@@ -369,6 +392,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Show all orders with their details
         public static async Task ShowOrdersWithDetailsAsync()
         {
             using var db = new StoreContext();

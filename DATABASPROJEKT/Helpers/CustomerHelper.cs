@@ -10,6 +10,7 @@ namespace DATABASPROJEKT.Helpers
 {
     public static class CustomerHelper
     {
+        // Show all customers
         public static async Task ShowCustomersAsync()
         {
             using var db = new StoreContext();
@@ -24,6 +25,8 @@ namespace DATABASPROJEKT.Helpers
             }
             Console.WriteLine("-------------------");
         }
+
+        // Add new customer
         public static async Task AddCustomerAsync()
         {
             Console.WriteLine("Enter customer name: ");
@@ -70,6 +73,7 @@ namespace DATABASPROJEKT.Helpers
             Console.WriteLine("Customer added successfully!");
         }
 
+        // Edit existing customer
         public static async Task EditCustomerAsync(int id)
         {
             using var db = new StoreContext();
@@ -139,6 +143,7 @@ namespace DATABASPROJEKT.Helpers
             }
         }
 
+        // Delete existing customer
         public static async Task DeleteCustomerAsync(int id)
         {
             using var db = new StoreContext();
