@@ -40,7 +40,7 @@ namespace DATABASPROJEKT
 
             var bytes = Convert.FromBase64String(krypteradText);
 
-            for (int i = 0; i <= bytes.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
                 bytes[i] = (byte)(bytes[i] ^ Key);
             }

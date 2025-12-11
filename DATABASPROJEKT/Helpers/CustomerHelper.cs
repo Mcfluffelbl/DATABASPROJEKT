@@ -141,7 +141,17 @@ namespace DATABASPROJEKT.Helpers
             }
 
             using var db = new StoreContext();
-            db.Customers.Add(new Customer { Name = name, Email = email, City = city, Address = address, PhoneNumber = phoneNumber, Password = password }); 
+
+            // Add new customer to DB with encrypted data
+            db.Customers.Add(new Customer 
+            {   
+                Name = name, 
+                Email = EncryptionHelper.Encrypt(email), 
+                City = EncryptionHelper.Encrypt(city), 
+                Address = EncryptionHelper.Encrypt(address), 
+                PhoneNumber = EncryptionHelper.Encrypt(phoneNumber), 
+                Password = EncryptionHelper.Encrypt(password) 
+            }); 
             try
             {
                 // Save changes
