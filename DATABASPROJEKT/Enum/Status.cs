@@ -9,8 +9,8 @@ namespace DATABASPROJEKT.Enum
     // Enum for order status
     public enum Status
     {
-        Pending,
-        Paid,
-        Shipped
+        Pending = 0,
+        Paid = 1,
+        Shipped = 2
     }
 }

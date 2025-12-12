@@ -92,9 +92,7 @@ namespace DATABASPROJEKT.Helpers
 
         // Add a new order
         public static async Task AddOrderAsync()
-        {
-            using var db = new StoreContext();
-
+        {           
             // Show existing customers to choose from
             Console.WriteLine("Current Customers: ");
             await CustomerHelper.ShowCustomersAsync();
@@ -125,7 +123,7 @@ namespace DATABASPROJEKT.Helpers
 
             Console.Write("> ");
 
-            if (!int.TryParse(Console.ReadLine(), out var input) || System.Enum.IsDefined(typeof(Status), input))
+            if (!int.TryParse(Console.ReadLine(), out var input) || !System.Enum.IsDefined(typeof(Status), input))
             {
                 Console.WriteLine("Invalid status selection.");
                 Console.WriteLine("----------------------------");
@@ -133,7 +131,7 @@ namespace DATABASPROJEKT.Helpers
             }
 
             Status choice = (Status)input;
-
+            using var db = new StoreContext();
             // Add Products to order
             var orderRows = new List<OrderRow>();
             while (true)
@@ -145,7 +143,9 @@ namespace DATABASPROJEKT.Helpers
                 Console.WriteLine("Enter Product ID to add to order (or leave blank to finish): ");
                 var prodInput = Console.ReadLine()?.Trim();
                 if (string.IsNullOrEmpty(prodInput))
+                {
                     break;
+                }           
 
                 if (!int.TryParse(prodInput, out var productId))
                 {
@@ -153,7 +153,6 @@ namespace DATABASPROJEKT.Helpers
                     Console.WriteLine("----------------------------");
                     continue;
                 }
-
                 var product = await db.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
                 if (product == null)
                 {
