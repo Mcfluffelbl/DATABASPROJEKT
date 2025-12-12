@@ -121,3 +121,18 @@ This project is not licensed.
 You may modify or use it at your own discretion.
 
 ## Screenshots
+
+1. ( Main Menu of the program )
+<img width="1108" height="356" alt="Skärmbild 2025-12-12 032403 1" src="https://github.com/user-attachments/assets/30e4fb72-354a-432f-9ba2-27e0ad5c1560" />
+
+2. ( Encrypted Customer info )
+<img width="1122" height="602" alt="Skärmbild 2025-12-12 032450 2" src="https://github.com/user-attachments/assets/a5415aba-7e1c-4592-9271-66114f956a4a" />
+
+3. ( Decrypted Customer info by use of the customers password )
+<img width="1095" height="610" alt="Skärmbild 2025-12-12 032513 3" src="https://github.com/user-attachments/assets/e7a2720a-0184-403f-8d60-85cff47c98c9" />
+
+4. ( Example method/function of the application )
+<img width="1094" height="601" alt="Skärmbild 2025-12-12 032544 4" src="https://github.com/user-attachments/assets/a0856ab3-c9d2-425a-84a5-515f4daf768d" />
+
+
+
