@@ -13,9 +13,6 @@ public static class Seeding
     // SeedAsync method to seed the database
     public static async Task SeedAsync()
     {
-        // Show path to the database file
-        Console.WriteLine("DB: " + Path.Combine(AppContext.BaseDirectory, "shop.db"));
-
         // Secure the DB with migrations and seed data
         using (var db = new StoreContext())
         {
