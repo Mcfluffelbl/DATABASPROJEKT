@@ -32,11 +32,11 @@ The database has a seeding with information on customers, products and more. The
 
 - Possible/known limitations of the program
 
-Order seed was removed, due to relationship issues, but new orders can be created correctly.
-Status should perhaps be available as more options than currently available.
-No admin system (anyone can delete everything).
-No role-based access control implemented.
-The status fields could be developed with more values.
+* Order seed was removed, due to relationship issues, but new orders can be created correctly.
+* Status should perhaps be available as more options than currently available.
+* No admin system (anyone can delete everything).
+* No role-based access control implemented.
+* The status fields could be developed with more values.
 
 ## Features
 
@@ -106,7 +106,7 @@ Orders -
 * Update order status
 * List all orders with pagination and sorting
 
-#Entity Relations
+## Entity Relations
 
 <img width="818" height="591" alt="Skärmbild 2025-12-12 030331" src="https://github.com/user-attachments/assets/11353ba4-f51d-4056-8e33-168ed5a2cf6b" />
 
